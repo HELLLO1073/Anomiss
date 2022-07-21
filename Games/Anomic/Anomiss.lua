@@ -1,4 +1,4 @@
--- Set up for obfuscation
+-- Set up for obfuscation & release
 
 -- // Kill function 
 -- loadstring(game:HttpGet("https://raw.githubusercontent.com/HELLLO1073/Anomiss/main/Games/Anomic/Obfuscation/kk.lua"))()
