@@ -68,6 +68,23 @@ local function CorrectArguments(Args)
     return Matching >= Required
 end
 
+local function HitDetection(character, part)
+    if _G.hitmanager.hitsounds.Enabled and character then
+        local hitplayer = nil
+        if workspace:FindFirstChild("HitsoundX2") then
+            hitplayer = workspace.HitsoundX2
+            hitplayer.Volume =  _G.hitmanager.hitsounds.Volume
+            hitplayer.SoundId = _G.hitmanager.hitsounds.ID
+        else
+            hitplayer = Instance.new("Sound", workspace)
+            hitplayer.Name = "HitsoundX2"
+            hitplayer.Volume =  _G.hitmanager.hitsounds.Volume
+            hitplayer.SoundId = _G.hitmanager.hitsounds.ID
+        end
+        hitplayer:Play()
+    end
+end
+
 local RayCastLength = 4500
 local oldNamecall, oldIndex
 oldNamecall = hookmetamethod(game, "__namecall", newcclosure(function(...)
@@ -117,8 +134,22 @@ oldNamecall = hookmetamethod(game, "__namecall", newcclosure(function(...)
     end
 
     if Method == "Kick" then		
-		return nil                    
-	end 
+	return nil                    
+    end 
+
+    if tostring(method) == "FireServer" and tostring(self) == "WeaponServer" and tostring(arguments[2]) == "Player" then
+        local character = arguments[3].Parent
+        local hitpart = arguments[5]
+
+        if _G.hitmanager.hitsounds.Enabled then
+	   task.spawn(HitDetection, arguments[3].Parent, hitpart)
+	end  
+
+        if _G.hitmanager.alwayshead and tostring(hitpart) ~= "Head" then
+            arguments[5] = character.Head
+            return oldnamecall(unpack(arguments))
+        end
+    end
     
     return oldNamecall(...)
 end))
