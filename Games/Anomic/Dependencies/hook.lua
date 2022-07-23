@@ -134,20 +134,20 @@ oldNamecall = hookmetamethod(game, "__namecall", newcclosure(function(...)
     end
 
     if Method == "Kick" then		
-	return nil                    
+	    return nil                    
     end 
 
-    if tostring(method) == "FireServer" and tostring(self) == "WeaponServer" and tostring(arguments[2]) == "Player" then
-        local character = arguments[3].Parent
-        local hitpart = arguments[5]
+    if tostring(Method) == "FireServer" and tostring(self) == "WeaponServer" and tostring(Arguments[2]) == "Player" then
+        local character = Arguments[3].Parent
+        local hitpart = Arguments[5]
 
         if _G.hitmanager.hitsounds.Enabled then
-	   task.spawn(HitDetection, arguments[3].Parent, hitpart)
-	end  
+            task.spawn(HitDetection, Arguments[3].Parent, hitpart)
+        end
 
         if _G.hitmanager.alwayshead and tostring(hitpart) ~= "Head" then
-            arguments[5] = character.Head
-            return oldnamecall(unpack(arguments))
+            Arguments[5] = character.Head
+            return oldNamecall(unpack(Arguments))
         end
     end
     
