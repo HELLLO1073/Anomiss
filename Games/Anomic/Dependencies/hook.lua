@@ -29,7 +29,7 @@ end
 
 local function Beam(origin, end_part)        
     if _G.BeamSettings.Enabled then
-        local colorSequence = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(225, 0, 255)),ColorSequenceKeypoint.new(1, _G.BeamSettings.EndColor),})
+        local colorSequence = ColorSequence.new({ColorSequenceKeypoint.new(0, _G.BeamSettings.StartColor),ColorSequenceKeypoint.new(1, _G.BeamSettings.EndColor),})
         local Part = Instance.new("Part", BeamPart)
 
         Part.Size = Vector3.new(1, 1, 1)
