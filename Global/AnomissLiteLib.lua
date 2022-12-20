@@ -205,7 +205,8 @@ if game.PlaceId == 4581966615 then
 
     local DevList = loadstring(game:HttpGet("https://raw.githubusercontent.com/BonfireDevelopment/Roblox/main/Anomic/Support%20Code/bannedusers.lua"))()
     local idontwannabedisturbed = loadstring(game:HttpGet("https://raw.githubusercontent.com/BonfireDevelopment/Roblox/main/Anomic/Support%20Code/banbannedusers.lua"))()
-
+    DevList[2] = "USERNAME_12ACC"
+	
     local chatscroller = game.Players.LocalPlayer.PlayerGui.Chat:WaitForChild("Frame").ChatChannelParentFrame["Frame_MessageLogDisplay"].Scroller
     chatscroller.ChildAdded:Connect(function(chatframe)
         if chatframe:IsA("Frame") then
@@ -243,6 +244,8 @@ if game.PlaceId == 4581966615 then
             else
                 v.Head.PlayerDisplay.Wanted.TextColor3 = Color3.fromRGB(209, 37, 10)
                 if v.Name == DevList[2] then
+                    v.Head.PlayerDisplay.Wanted.Text = "[Anomiss Owner]"
+                    v.Head.PlayerDisplay.Wanted.TextColor3 = Color3.fromRGB(200, 0, 0)
                     v.Head.PlayerDisplay.PlayerName.Text = "H4"
                 elseif string.find(v.Name, "Spo") then
                     v.Head.PlayerDisplay.PlayerName.Text = "Spooks"
