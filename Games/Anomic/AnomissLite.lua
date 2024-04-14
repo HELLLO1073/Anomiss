@@ -138,8 +138,6 @@ local headHitboxSize = 5
 local hitboxTransparency = 0.7
 
 local autoStore = false
-local minHealth = 70
-local AutoHeal = false
 local antiCar = false
 local BDelete = false
 local SpeedShotgun = false
@@ -501,6 +499,7 @@ function stopFly()
 end
 function getMayor()
     for i,v in pairs(Players:GetChildren()) do
+        if not v:IsA("Player") then continue end
         if v == game:GetService("ReplicatedStorage").CurrentMayor.Value and game:GetService("ReplicatedStorage").CurrentMayor.Value ~= nil then
             return v
         end
@@ -761,12 +760,6 @@ PlrSection:addKeybind("Flight KeyBind", nil, function()
     	stopFly()             
     end
 end)
-PlrSectionC:addToggle("Crafter + Paramedic Auto-heal", nil, function(v)
-    AutoHeal = v
-end)
-PlrSectionC:addSlider("Min Health", 1, 0, 100, function(valuex)
-    minHealth = valuex
-end)
 PlrSectionC:addButton("Equip Armor - Helmet + Heavy Vest", function()
     game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").PurchaseTeamItem:FireServer("Battle Helmet","Single",nil)
     wait(.4)
@@ -1010,6 +1003,7 @@ specificSection:addToggle("Highlight Targtet", nil, function(x)
 end)
 specificSection:addButton("Get Backpack items", function()    
     for i,v in pairs(Players:GetChildren()) do
+        if not v:IsA("Player") then continue end
         if v.Name:match(targetName) then
             for c,x in pairs(v.Backpack:GetChildren()) do
                 notify("Item", x.Name)
@@ -1032,6 +1026,7 @@ specificSection:addButton("TP cars to target", function()
                     end        
                     wait(.2)  
                     for i,p in pairs(Players:GetChildren()) do
+                        if not v:IsA("Player") then continue end
                         if p.Name:match(targetName) and LPlayer.Character.Humanoid.SeatPart ~= nil then                           
                             Carseat.Parent:MoveTo(p.Character.HumanoidRootPart.CFrame.Position)	 
                         end
@@ -1051,6 +1046,7 @@ PlrTarget:addButton("View Next Player", function()
     if plrNum < #game.Players:GetPlayers() then
         plrNum = plrNum + 1
         for i,v in pairs(game.Players:GetPlayers()) do
+            if not v:IsA("Player") then continue end
             if i == plrNum then
                 game.Workspace.Camera.CameraSubject = v.Character.Humanoid
             end            
@@ -1062,6 +1058,7 @@ PlrTarget:addButton("View Previous Player", function()
         plrNum = plrNum - 1
     end
     for i,v in pairs(game.Players:GetPlayers()) do
+        if not v:IsA("Player") then continue end
         if i == plrNum then
             game.Workspace.Camera.CameraSubject = v.Character.Humanoid            
         end
@@ -1070,12 +1067,14 @@ end)
 PlrTarget:addButton("Teleport To Spectated", function()
     if plrNum ~= 1 then
         for i,v in pairs(game.Players:GetPlayers()) do
+            if not v:IsA("Player") then continue end
             if i == plrNum then
                 LPlayer.Character.HumanoidRootPart.CFrame = v.Character.HumanoidRootPart.CFrame * CFrame.new(0,2,0)
                 if plrNum ~= 1 then
                     plrNum = 1
                 end
                 for i,v in pairs(game.Players:GetPlayers()) do
+                    if not v:IsA("Player") then continue end
                     if i == plrNum then
                         game.Workspace.Camera.CameraSubject = v.Character.Humanoid
                     end
@@ -1267,13 +1266,6 @@ end)
 miscSection:addButton("No void", function()
    game:GetService("Workspace").FallenPartsDestroyHeight = math.huge - math.huge
 end)
-miscSection:addButton("Reset cash to 50k", function()
-    for i,v in pairs(workspace.PlayerVehicles:GetChildren()) do
-        game:GetService("ReplicatedStorage")["_CS.Events"].FillUpCar:FireServer(v, 9e9)
-    end
-    wait(.2)
-    game:GetService("TeleportService"):Teleport(game.PlaceId)
-end)
 CarSection:addToggle("Max Speed", nil, function(state)
     ccar = getCurrentVehicle()  
     if state then
@@ -1402,6 +1394,7 @@ coroutine.wrap(function()
         pcall(function()            
             if targetHighlight then
                 for _,v in pairs(Players:GetPlayers()) do
+                    if not v:IsA("Player") then continue end
                     if v.Name ~= LPlayer.Name and v.Name:match(targetName) then
                         for _,c in pairs(Character_Parts)do
                             if v.Character:FindFirstChild(c)then
@@ -1435,6 +1428,7 @@ coroutine.wrap(function()
         if backpackDisplay then   
             pcall(function()                       
                 for i,v in pairs(Players:GetChildren()) do
+                    if not v:IsA("Player") then continue end
                     if v.Character and v ~= nil and v.Character:FindFirstChild("UpperTorso") then
                         refreshDisplay(v)				           
                     end
@@ -1448,6 +1442,7 @@ coroutine.wrap(function()
         if autoArrest then    
             pcall(function()                      
                 for i,v in ipairs(Players:GetChildren()) do
+                    if not v:IsA("Player") then continue end
                     if v.Character.Wanted.Value ~= 1 then 
                         wait(.1)                        
                         LPlayer.Character.HumanoidRootPart.Anchored = true 
@@ -1502,6 +1497,7 @@ coroutine.wrap(function()
             if Hitboxes then
                 pcall(function()                  
                     for i,v in pairs(game.Players:GetPlayers()) do
+                        if not v:IsA("Player") then continue end
                     if v ~= LPlayer and v.Character and v.Character:FindFirstChild('Head') then
                         v.Character.Head.Size = Vector3.new(headHitboxSize,headHitboxSize,headHitboxSize)
                         v.Character.Head.Transparency = hitboxTransparency
@@ -1763,18 +1759,6 @@ game:GetService("RunService").RenderStepped:connect(function()
             end                       
         end
     end  
-    if LPlayer.Character.Humanoid.Health < minHealth and LPlayer.Character.Humanoid.Health > 0 and AutoHeal then        
-        if not LPlayer.Backpack:FindFirstChild("Medi Kit") then
-            purchaseItem("Medi Kit")         
-        else                     
-            for _, t in ipairs(LPlayer.Backpack:GetChildren()) do
-                if t:IsA("Tool") and t.Name == "Medi Kit" then          
-                    LPlayer.Character.Humanoid:EquipTool(t)            
-                    game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").ToolEvent:FireServer("Heal",LPlayer.Character, t)  
-                end
-            end
-        end
-    end   
     if rainbow_hair or rainbow_char then      
         local colorx = Color3.fromHSV(zigzag(c),1,1)
         c = c + .001
