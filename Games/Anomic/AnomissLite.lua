@@ -1,316 +1,414 @@
---// Anomic Original | Anomiss beta | Open source
---// Credits: ESP Library : Sirius esp lib, Script Creator : H4#0321
---// If you want to use any scripts from here please dm me, thanks
+--// Anomic Script, old and buggy could use a rewrite entirely i admit. - H4#0321
+--// Note the FE character features that were merged from "alwayswin" were actually from infinite yield anomic, I didn't know but credits go to them.
 
---// Variables
-print("Loading | %0")
-local CharacterParts = {"Head", "HumanoidRootPart", "LeftHand", "RightHand", "LeftFoot", "RightFoot"}
-local MessageCard = game:GetService("ReplicatedStorage"):WaitForChild("UserInterface").Card
+local mainName = "Anomiss Lite | 3.0.0" 
+if game:GetService("CoreGui"):FindFirstChild(mainName) then
+    game.CoreGui[mainName]:Destroy()
+end
+
+print("Loading | LIB") 
+
+-- Library
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/HELLLO1073/Anomiss/main/Global/AnomissLiteLib.lua"))()
+local Main = library.new(mainName)
+
+-- // Tabs
+local PlayerPage = Main:addPage("Player", 5012544693)
+local CombatPage = Main:addPage("Combat", 6034509993)
+local EspPage = Main:addPage("Visuals", 5012544693)
+local OthersPage = Main:addPage("Others", 6031280883)
+local TeleportPage = Main:addPage("Teleportation", 6031280883)
+local ShopPage = Main:addPage("Guns", 6034509993)
+local MiscPage = Main:addPage("Miscellaneous", 6034509993)
+local UiPage = Main:addPage("Settings", 6022860343)
+
+-- // Sections
+-- // Combat Section
+local ASection1 = CombatPage:addSection("Head Hitboxes")
+local ASection2 = CombatPage:addSection("Shotgun Mods - (Turn off for other weapons)")
+local ASection22 = CombatPage:addSection("Other Mods")
+
+-- // Player Section
+local PlrSection = PlayerPage:addSection("Movement")
+local PlrSectionC = PlayerPage:addSection("Crafter Role")
+local plrApp = PlayerPage:addSection("Appearance")
+local plrAppFE = PlayerPage:addSection("FE Stuff")
+local teamSection = PlayerPage:addSection("Team Changer (Cooldown)")
+
+-- // EspPage Section
+local DisplaySection = EspPage:addSection("Display")
+local EspSection = EspPage:addSection("ESP")
+local EspSection1 = EspPage:addSection("ESP Configuration")
+local wrldSection = EspPage:addSection("Client World")
+local MiscEsp = EspPage:addSection("Miscellaneous ESP")
+
+-- // Other Section 
+local specificSection = OthersPage:addSection("Specific Section")
+local PlrTarget = OthersPage:addSection("Other Players")
+local DonateSection = OthersPage:addSection("Donate Section")
+local OtherSection0 = OthersPage:addSection("Trolling") 
+
+-- // Teleport Section
+local teleSection1 = TeleportPage:addSection("Player")
+local teleSection2 = TeleportPage:addSection("Location Teleport")
+local teleSection3 = TeleportPage:addSection("Safe spots")
+local teleSection4 = TeleportPage:addSection("Miscellaneous")
+
+-- // Buy Section
+local paintSection = ShopPage:addSection("Painting")
+local AutoBuySection = ShopPage:addSection("Auto Buy")
+local BuySectionMisc2 = ShopPage:addSection("Misc / Troll")
+
+-- // Miscellaneous Section
+local miscSection = MiscPage:addSection("Miscellaneous")
+local CarSection = MiscPage:addSection("Miscellaneous Vehicle")
+local boomSection = MiscPage:addSection("Boombox Player (Hold Boombox)")
+
+-- // UI Section
+local ThemeSection = UiPage:addSection("Theme")
+local UISection = UiPage:addSection("UI")
+
+-- // Credits Section
+local creds = UiPage:addSection("Developers: H4#0321")
+local UISection2 = UiPage:addSection("Discord: https://discord.gg/mkv55KWCsp")
+local UISection2 = UiPage:addSection("Credits: EdgeIY, for the fly, Alwayswin for a few FE features when we merged.")
+
+print("Loading | R")
+if syn then
+    syn.request({ 
+        Url = "http://127.0.0.1:6463/rpc?v=1",
+        Method = "POST",
+        Headers = {
+        ["Content-Type"] = "application/json",
+        ["Origin"] = "https://discord.com"
+    },
+    print("Loading | R 50%");
+    Body = game:GetService("HttpService"):JSONEncode({
+        cmd = "INVITE_BROWSER",
+        args = {
+            code = "mkv55KWCsp"
+        },
+            nonce = game:GetService("HttpService"):GenerateGUID(false)
+        }),
+    })
+end
+
+local chatSettings = require(game:GetService("Chat").ClientChatModules.ChatSettings)
+local chatFrame = game:GetService("Players").LocalPlayer.PlayerGui.Chat.Frame
+chatSettings.WindowResizable = true
+chatSettings.WindowDraggable = true
+chatFrame.ChatChannelParentFrame.Visible=true
+chatFrame.ChatBarParentFrame.Position = chatFrame.ChatChannelParentFrame.Position+UDim2.new(UDim.new(),chatFrame.ChatChannelParentFrame.Size.Y)
+
+print("LIB Success")
+print("Loading | 1%")
+
+-- ESP
+local esp_Enabled      = false
+local esp_Names        = false
+local esp_Health       = false
+local esp_WantedLevel  = false
+local esp_distance     = false
+local esp_boxes        = false
+local esp_tracers      = false
+local esp_tracer_orig  = "Bottom"
+local esp_Main_Colour  = Color3.fromRGB(255, 255, 255)
+local rainbow_char     = false
+local rainbow_hair     = false
+local esp_tools        = false
+-- Player
 local CSEvents = game:GetService("ReplicatedStorage"):WaitForChild("_CS.Events")
-local Entities = game:GetService("Workspace"):WaitForChild("Entities")
-local UserInput = game:GetService("UserInputService")
-local Players = game:GetService("Players")
-print("Loading | %5")
-local LocalPlayer = Players.LocalPlayer
-local CCamera = workspace.CurrentCamera
-local Mouse = LocalPlayer:GetMouse()
-local espLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Sirius/request/library/esp/esp.lua'),true))()
+local teamList = require(game:GetService("ReplicatedStorage").Client.TeamList)
+local itemList = require(game.ReplicatedStorage.Client.ItemList)
+local camera   = game:GetService("Workspace").Camera
+local wLighting = game:GetService("Lighting")
+local UIS = game:GetService'UserInputService'
+local Players  = game:GetService("Players")
+local LPlayer  = Players.LocalPlayer
+local mouse = LPlayer:GetMouse()
+--Mods
+local infiniteStamina = false
+local jumpMode = "Infinite"
+local infiniteJump = false
+local gunSoundSpam = false
+local shotgunMod1 = false
+local Rmod = false
+local speedBypass = false
 
-print("Loading | %10")
+local Hitboxes = false
+local headHitboxSize = 5
+local hitboxTransparency = 0.7
 
-espLib.whitelist = {} 
-espLib.blacklist = {}
-espLib.options = {
-    enabled = false,
-    scaleFactorX = 4,
-    scaleFactorY = 5,
-    font = 2,
-    fontSize = 13,
-    limitDistance = true,
-    maxDistance = 500,
-    visibleOnly = false,
-    teamCheck = false,
-    teamColor = false,
-    fillColor = nil,
-    whitelistColor = Color3.new(1, 0, 0),
-    outOfViewArrows = false,
-    outOfViewArrowsFilled = false,
-    outOfViewArrowsSize = 15,
-    outOfViewArrowsRadius = 300,
-    outOfViewArrowsColor = Color3.new(1, 1, 1),
-    outOfViewArrowsTransparency = 0.5,
-    outOfViewArrowsOutline = false,
-    outOfViewArrowsOutlineFilled = false,
-    outOfViewArrowsOutlineColor = Color3.new(1, 1, 1),
-    outOfViewArrowsOutlineTransparency = 0,
-    names = false,
-    nameTransparency = 1,
-    nameColor = Color3.new(1, 1, 1),
-    boxes = false,
-    boxesTransparency = 1,
-    boxesColor = Color3.new(1, 1, 1),
-    boxFill = false,
-    boxFillTransparency = 0.5,
-    boxFillColor = Color3.new(1, 1, 1),
-    healthBars = false,
-    healthBarsSize = 1,
-    healthBarsTransparency = 1,
-    healthBarsColor = Color3.new(0, 1, 0),
-    healthText = false,
-    healthTextTransparency = 1,
-    healthTextSuffix = "%",
-    healthTextColor = Color3.new(1, 1, 1),
-    distance = false,
-    distanceTransparency = 1,
-    distanceSuffix = " Studs",
-    distanceColor = Color3.new(1, 1, 1),
-    tracers = false,
-    tracerTransparency = 1,
-    tracerColor = Color3.new(1, 1, 1),
-    tracerOrigin = "Bottom", -- Available [Mouse, Top, Bottom]
-    chams = false,
-    chamsColor = Color3.new(1, 0, 0),
-    chamsTransparency = 0.5,
-}
+local autoStore = false
+local minHealth = 70
+local AutoHeal = false
+local antiCar = false
+local BDelete = false
+local SpeedShotgun = false
+local SpeedSDelay = 0.05
+local shotMulti = false
+local shotMultiAmmount = 1
+local targetHighlight = false
 
-local ChatSettings = require(game.Chat.ClientChatModules.ChatSettings)
-local ChatFrame = LocalPlayer.PlayerGui.Chat.Frame
-ChatSettings.WindowResizable = true
-ChatSettings.WindowDraggable = true
-ChatFrame.ChatChannelParentFrame.Visible = true
-ChatFrame.ChatBarParentFrame.Position = ChatFrame.ChatChannelParentFrame.Position+UDim2.new(UDim.new(),ChatFrame.ChatChannelParentFrame.Size.Y)
+local customHitSound = false
+local customHitSoundType = "Skeet"
+local alwaysHeadShot = false
 
-local BeamPart = Instance.new("Part", workspace)    
-BeamPart.Name = "BeamPart"
-BeamPart.Transparency = 1
+_G.flySpeed = 1
+local lJumpHeight = 30
+local ThemeEnabled = true
+local ThemeMode = "Purple" -- Red,Green,White
+local folderImpacts = game:GetService("Workspace").RayIgnore.BulletHoles
 
-print("Loading | %15")
+local DevList = loadstring(game:HttpGet("https://raw.githubusercontent.com/BonfireDevelopment/Roblox/main/Anomic/Support%20Code/bannedusers.lua"))()
 
---// Settings
-local Anomiss = {
-    Aimbot = {
-        Enabled = false,
-        HitPart = "Head",
-        AimSpeed = 0.32,
-        FOV = {Enabled = false, NumSides = 120, Radius = 150, Color = Color3.fromRGB(200, 200, 200), Position = "Center"}, --// Center, Mouse
-        Silent_aim = {
-            Enabled = false, 
-            Origin = "Called",
-            PrintCallingScript = false,
-            CallingScript = "",
-            Beams = false,
-            BeamProperties = {Color = Color3.fromRGB(131, 0, 253)},
-            Origin_Ignore = "",
-            AutoFire = false,
-            InstantKill = false,
-            HitMuliplier = 0
-        },
-        Checks = {
-           Visible = false, 
-           Forcefield = false 
-        }
-    },
-    Visuals = {
-        MaxDistance = 500,
-        Enables = {
-            TargetHighlight = false;
-            Aimbient = false;
-            OutDoorAimbient = false;
-            Terrain = false;
-            TerrainGround = false;
-            Shadows = game.Lighting.GlobalShadows;
-            HiddenGrass = false;
-            Chams = {Enabled = false, Color = Color3.fromRGB(255,0,0), Rainbow = false, Transparency = 0.5, OutlineTransparency = 0}
-        };
-        Colors = {
-            Aimbient =  game.Lighting.Ambient;
-            OutDoorAimbient = game.Lighting.OutdoorAmbient;    
-            TerrainGrassMaterial = Enum.Material.Grass,
-            TerrainGrassColor = workspace.Terrain:GetMaterialColor(Enum.Material.Grass),
-            TerrainGroundMaterial = Enum.Material.Ground,
-            TerrainGroundColor = workspace.Terrain:GetMaterialColor(Enum.Material.Ground), 
-        },
-        Other = {
-            Thirdperson = false,
-            ThirdpersonX = 0,
-            ThirdpersonY = 0,
-            ThirdpersonZ = 0,
-    
-            AA_Enabled = false, 
-            AA_Mode = "Spin", --// Spin, Custom
-            SpinSpeed = 5,
-        }
-    },
-    Movement = {
-        Overide = false,
-        jumppower = 30, 
-        Walkspeed = 13,
-        RunSpeed = 23,
-        Running = false,
-        Flying = false,
-        InfiniteJump = false,
-        Noclip = false 
-    },
-    GunModifiers = {
-        FlightShot = false,
-
-    }
-}
-
-local ValidItemList = {
-	semis = {"Combat Pistol", "Classic Pistol", "Snubnose", "Revolver", "Pistol .50", "Heavy Pistol", "Handgun", "Autorevolver"},
-	autos = {"Service Rifle", "PDW .45", "Bullpup Rifle", "Skorpion", "Tactical SMG", "Micro SMG", "Riot PDW", "Carbine", "Battle Rifle MKII", "Kalashnikov", "SMG", "Bullpup SMG", "Battle Rifle", "AR"},
-	shotguns = {"Riot Shotgun", "Bullpup Shotgun", "Sawed Off", "Shotgun"},
-	Tools = {"Sprayer", "Stamina Booster", "Lockpick", "Health Booster", "Medi Kit", "Drill", "Repair Kit"},
-	armors = {"Heavy Vest", "Balaclava", "Battle Helmet", "Riot Helmet", "Light Vest"},
-	Ammo = {"9mm", "5.7x28", "12 Gauge", ".50", ".45 ACP", "5.56"},
-	cars = {"Supercar", "Sport Hatch", "Hypercar", "Muscle Car", "SUV (Dune)", "SUV", "Luxury SUV", "Humvee", "Cab", "Van", "Convertible", "Hatchback", "RV", "Pickup", "Coupe", "Lowrider", "Sedan (Facelift)", "Caracal Van", "Sedan", "Sports Car", "Limousine", "Minivan", "Bus", "Luxury Car", "Ambulance"}
-}
-    
-local Settings = {
-    EndColor = Color3.new(1, 1, 1),
-    StartWidth = 0.1,
-    EndWidth = 0.05,    
-    Time = 1
-}
-
---// Other Variables
-local fovOveride = false
-local fovValue = 120
-local Fov_Circle = nil
-local Aiming = false
-local ChamCache = {}
-local FLYING = false
-local FlightSpeed = 2
-local ChamColorPicker
-
-print("Loading | %20")
-
---// Functions 
-local function PlayerFromName(name)                     for i,v in pairs(Players:GetPlayers()) do if v.Name == tostring(name) then return v; end end end
-local function CheckVisible(Origin, Character, Part)    if Anomiss.Aimbot.Checks.Visible then local MyCharacter = LocalPlayer.Character if MyCharacter ~= nil and Character ~= nil then local PartFound = workspace.FindPartOnRayWithIgnoreList(workspace, Ray.new(Origin, Part.Position - Origin), {MyCharacter, CCamera, Character}, false, true) return PartFound == nil end else return true end end
-local function FireGun(FireKey)
-    --print("Fired gun!")
-    if FireKey == "Mouse1" then
-        mouse1press()
-        task.wait(0.5)
-        mouse1release()
-    elseif FireKey == "Mouse2" then
-        mouse2press()
-        task.wait(0.5)
-        mouse2release()
-    end
+print("Loading | TeamMod")
+for i,v in pairs(teamList) do    
+    v.Spawns = { "Arway", "Sheriff Station", "Eastdike", "Eaphis Plateau", "Pahrump", "Okby Steppe", "Depository", "Airfield", "Depot", "Clinic", "Towing Company"}    
 end
-local function ClosestTarget(target_part) 
-    local Closest = nil; 
-    local Distance = math.huge; 
- 
-    if Anomiss.Aimbot.HitPart == "Random" then
-        target_part = CharacterParts[math.random(1, #CharacterParts)]
-    elseif Anomiss.Aimbot.HitPart == "Anti-God" then
-        target_part = "LeftHand" or "RightHand"
-    end
 
-    for i,v in next, game.GetChildren(Players) do  
-        if v ~= LocalPlayer and v.Character and game.FindFirstChild(v.Character, target_part) and game.FindFirstChild(v.Character, "Humanoid") then 
-            if Anomiss.Aimbot.Enabled or Anomiss.Aimbot.Silent_aim.Enabled then
-                local CenterOfScreen = Vector2.new(CCamera.ViewportSize.X / 2, CCamera.ViewportSize.Y / 2)
-                local Character = v.Character 
-                local Humanoid = game.FindFirstChild(Character, "Humanoid") 
-                local targetPart = game.FindFirstChild(Character, target_part) 
-                local vector3, onscreen = CCamera.WorldToScreenPoint(CCamera, targetPart.Position)
-                local screenVec = Vector2.new(vector3.X, vector3.Y)
+print("Loading | 10%")
+-- Functions 
+function notify(title, message)game:GetService("Players").LocalPlayer.PlayerGui.Notify.TimePosition = 0 game:GetService("Players").LocalPlayer.PlayerGui.Notify.Playing = true if not message then require(game:GetService("ReplicatedStorage"):WaitForChild("Client").NotificationHandler):AddToStream(game.Players.LocalPlayer,title) else require(game:GetService("ReplicatedStorage"):WaitForChild("Client").NotificationHandler):AddToStream(game.Players.LocalPlayer,title..": "..message)end end
+function purchaseItem(name)game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").PurchaseTeamItem:FireServer(name,"Single",nil)end
+function Action(Object, Function)if Object ~= nil then Function(Object); end end
+function noclip() if LPlayer.Character ~= nil then for _, child in pairs(LPlayer.Character:GetDescendants()) do if child:IsA("BasePart") and child.CanCollide == true then child.CanCollide = false end end end end
 
-                local distanceFromCenter = nil
+local function bypass()
+    repeat wait() until LPlayer.Character.HumanoidRootPart.Anchored == false    
+        for i, v in next, getconnections(game:GetService("Players").LocalPlayer.Character.DescendantAdded) do
+            v:Disable()
+    	end
+        local s, err = pcall(function()
+            local mt = getrawmetatable(game)
+            setreadonly(mt, false)
+            local namecall = mt.__namecall
 
-                if Anomiss.Aimbot.FOV.Position == "Center" then
-                    distanceFromCenter = (CenterOfScreen-screenVec).Magnitude 
-                elseif Anomiss.Aimbot.FOV.Position == "Mouse" then
-                    distanceFromCenter = (Vector2.new(Mouse.X, Mouse.Y + 36) - screenVec).Magnitude
+            mt.__namecall = function(self,...)
+                local args = {...}
+                local method = getnamecallmethod()
+                if tostring(method) == 'FindPartOnRayWithWhitelist' and getcallingscript() == game.Players.LocalPlayer.PlayerGui['_L.Handler'].GunHandlerLocal then
+                    wait(9e9)
+                    return
                 end
-
-                if Anomiss.Aimbot.Checks.Forcefield and game.FindFirstChild(Character, "ForceField") then 
-                    continue 
-                end 
-
-                if onscreen and Humanoid.Health > 0.0 and CheckVisible(CCamera.CFrame.Position, Character, targetPart) then 
-                    if distanceFromCenter <= Distance and distanceFromCenter <= Anomiss.Aimbot.FOV.Radius then 
-                        Closest = targetPart Distance = distanceFromCenter 
-                    end 
-                end 
-            else
-                return nil
-            end
-        end 
-    end 
-
-    return Closest; 
-end 
-local function ChamPlayer(player)
-    local Highlight = Instance.new("Highlight")
-    Highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-
-    Highlight.FillColor = Anomiss.Visuals.Enables.Chams.Color
-    Highlight.FillTransparency = Anomiss.Visuals.Enables.Chams.Transparency
-
-    Highlight.OutlineColor = Color3.fromRGB(0,0,0)
-    Highlight.OutlineTransparency = Anomiss.Visuals.Enables.Chams.OutlineTransparency
-    
-    Highlight.Adornee = player.Character
-    Highlight.Parent = player.Character
-    
-    player.CharacterAdded:Connect(function()
-        Highlight.Adornee = player.Character
-        Highlight.Parent = player.Character
-    end)
-    player.CharacterRemoving:Connect(function()
-        Highlight.Adornee = nil
-        Highlight.Parent = nil
-    end)
-
-    ChamCache[player] = Highlight
+                if method == "Kick" then
+                    notify("Anomic V","Server tried kicking you")
+                    return nil                    
+                end        
+                if tostring(method) == "FireServer" then
+                    if shotgunMod1 and tostring(self) == "AmmoRemover" then                        
+                        return nil
+                    end                           
+                end
+                if tostring(method) == "Fire" then
+                    if Rmod and tostring(self) == "ShootAnim" then
+                        return nil
+                    end                   
+                end
+            return namecall(self,...)
+        end
+    end)         
 end
-local function ClearChamCache()
-    for i, h in next, ChamCache do 
-        if h then
-            h:Destroy()
-            if ChamCache[i] then
-                ChamCache[i] = nil
-            end
+
+print("Loading anti kick")
+local protect = newcclosure or protect_function
+hookfunction(game:GetService("Players").LocalPlayer.Kick,protect(function() 
+    wait(9e9) 
+end))
+print("anti-kick success")
+local colors = {
+    white     = Color3.fromRGB(255,255,255),
+    lightGrey = Color3.fromRGB(70,70,70),
+    grey      = Color3.fromRGB(50,50,50),
+    black     = Color3.fromRGB(0,0,0),     
+    stamBar   = Color3.fromRGB(250,20,100),     
+}
+function setTheme()
+   if LPlayer.PlayerGui:FindFirstChild("MainUIHolder") and LPlayer ~= nil  then 
+       --print("Theme set")
+       LPlayer.PlayerGui.MainMenu.ButtonBar.Teams.BackgroundColor3 = colors.grey
+       LPlayer.PlayerGui.MainMenu.ButtonBar.Spawn.BackgroundColor3 = colors.lightGrey
+       LPlayer.PlayerGui.MainMenu.ButtonBar.Editor.BackgroundColor3 = colors.grey
+       LPlayer.PlayerGui.MainMenu.TeamGUI.BackgroundColor3 = colors.grey
+       LPlayer.PlayerGui.MainMenu.TeamGUI.BorderColor3 = colors.lightGrey
+       LPlayer.PlayerGui.MainMenu.TeamGUI.Description.BackgroundColor3 = colors.grey
+       LPlayer.PlayerGui.MainMenu.TeamGUI.Description.BorderColor3 = colors.lightGrey
+       LPlayer.PlayerGui.MainMenu.TeamGUI.TeamBackground.BackgroundColor3 = colors.grey
+       LPlayer.PlayerGui.MainMenu.TeamGUI.Description.JoinButton.BackgroundColor3 = colors.lightGrey
+       LPlayer.PlayerGui.MainMenu.TeamGUI.Description.JoinButton.BorderColor3 = colors.white
+       LPlayer.PlayerGui.AvatarEditor.WearButton.BackgroundColor3 = colors.lightGrey
+       LPlayer.PlayerGui.AvatarEditor.WearButton.BorderColor3 = colors.white
+       LPlayer.PlayerGui.AvatarEditor.MainFrame.CustomShirtPants.IdBox.BackgroundColor3 = colors.lightGrey 
+       LPlayer.PlayerGui.AvatarEditor.MainFrame.CustomShirtPants.IdBox.BorderColor3 = colors.white 
+       LPlayer.PlayerGui.AvatarEditor.MainFrame.CustomShirtPants.WearButton.BorderColor3 = colors.white
+       LPlayer.PlayerGui.AvatarEditor.MainFrame.CustomShirtPants.WearButton.BackgroundColor3 = colors.lightGrey  
+       
+       for i,v in pairs(LPlayer.PlayerGui.MainMenu.TeamGUI.TeamBackground:GetChildren()) do
+           if v.Name ~= "UIListLayout" then
+               v.Design.ImageColor3 = colors.black
+           end            
+       end 
+   end
+   if LPlayer.PlayerGui:FindFirstChild("MainUIHolder") and LPlayer ~= nil  then 
+       if LPlayer.PlayerGui.MainUIHolder:FindFirstChild("Menus") and LPlayer ~= nil then
+           LPlayer.PlayerGui.MainUIHolder.Menus.BackpackGUI.Basic.BackgroundColor3 = colors.grey
+           LPlayer.PlayerGui.MainUIHolder.Menus.BackpackGUI.Basic.BorderColor3 = colors.white           
+           LPlayer.PlayerGui.MainUIHolder.Menus.BackpackGUI.BorderColor3 = colors.lightGrey 
+           LPlayer.PlayerGui.MainUIHolder.Menus.BackpackGUI.ImageLabel.BackgroundColor3 = colors.black
+           LPlayer.PlayerGui.MainUIHolder.Menus.BackpackGUI.ImageLabel.ImageColor3 = colors.black
+           LPlayer.PlayerGui.MainUIHolder.Menus.BackpackGUI.ImageLabel.ImageTransparency = 0.5
+           LPlayer.PlayerGui.MainUIHolder.Menus.TeamGUI.ShopF.Description.BackgroundColor3 = colors.grey
+           LPlayer.PlayerGui.MainUIHolder.Menus.TeamGUI.ShopF.Description.BackgroundColor3 = colors.lightGrey
+           LPlayer.PlayerGui.MainUIHolder.Menus.TeamGUI.ShopF.BackgroundColor3 = colors.grey
+           LPlayer.PlayerGui.MainUIHolder.Menus.TeamGUI.ShopF.BorderColor3 = colors.lightGrey
+           LPlayer.PlayerGui.MainUIHolder.Menus.TeamGUI.ShopF.Description.PurchaseForRobux.BackgroundColor3 = colors.grey
+           LPlayer.PlayerGui.MainUIHolder.Menus.TeamGUI.ShopF.Description.PurchaseOptions.BackgroundColor3 = colors.grey
+           LPlayer.PlayerGui.MainUIHolder.Menus.TeamGUI.ShopF.Description.Statistics.BackgroundColor3 = colors.grey
+           LPlayer.PlayerGui.MainUIHolder.Menus.TeamGUI.ShopF.Description.BodyColorSelection.Grid.BackgroundColor3 = colors.grey
+           LPlayer.PlayerGui.MainUIHolder.Menus.TeamGUI.ShopF.Description.BodyColorSelection.BackgroundColor3 = colors.grey
+           LPlayer.PlayerGui.MainUIHolder.Menus.TeamGUI.ShopF.BackgroundColor3 = colors.grey 
+           LPlayer.PlayerGui.MainUIHolder.Menus.TeamGUI.ShopF.BorderColor3 = colors.lightGrey
+           LPlayer.PlayerGui.MainUIHolder.Menus.TeamGUI.ShopF.ImageLabel.ImageColor3 = colors.black
+           LPlayer.PlayerGui.MainUIHolder.Menus.TeamGUI.ShopF.ImageLabel.ImageTransparency = 0.4
+           LPlayer.PlayerGui.MainUIHolder.Menus.TeamGUI.ShopF.Description.BorderColor3 = colors.grey
+           LPlayer.PlayerGui.MainUIHolder.StaminaBar.BackgroundColor3 = colors.grey
+           LPlayer.PlayerGui.MainUIHolder.MessageBar.BackgroundColor3 = colors.grey
+           LPlayer.PlayerGui.MainUIHolder.StaminaBar.Background.BackgroundColor3 = colors.black
+           LPlayer.PlayerGui.MainUIHolder.StaminaBar.Background.StatNum.TextColor3 = Color3.fromRGB(255,255,255)
+           LPlayer.PlayerGui.MainUIHolder.PhoneBar.Phone.ImageColor3 = Color3.fromRGB(30,30,30)
+           LPlayer.PlayerGui.MainUIHolder.PhoneBar.Phone.Exlam.TextColor3 = colors.white
+           LPlayer.PlayerGui.MainUIHolder.MenuBar.ImageLabel.BackgroundColor3 = colors.black
+           LPlayer.PlayerGui.MainUIHolder.MenuBar.ImageLabel.ImageColor3 = Color3.fromRGB(30,30,30)
+           LPlayer.PlayerGui.MainUIHolder.MenuBar.BackgroundColor3 = Color3.fromRGB(15,15,15)
+           if ThemeMode == "Purple" then
+               LPlayer.PlayerGui.MainUIHolder.StaminaBar.Background.Bar.BackgroundColor3 = Color3.fromRGB(255, 29, 108) -- Stam
+               else if ThemeMode == "Red" then
+                   LPlayer.PlayerGui.MainUIHolder.StaminaBar.Background.Bar.BackgroundColor3 = Color3.fromRGB(199, 0, 0) -- Stam
+                   else if ThemeMode == "Green" then
+                       LPlayer.PlayerGui.MainUIHolder.StaminaBar.Background.Bar.BackgroundColor3 = Color3.fromRGB(41, 206, 0) -- Stam
+                       else if ThemeMode == "White" then
+                           LPlayer.PlayerGui.MainUIHolder.StaminaBar.Background.Bar.BackgroundColor3 = Color3.fromRGB(255, 255, 255) -- Stam
+                           LPlayer.PlayerGui.MainUIHolder.StaminaBar.Background.StatNum.TextColor3 = Color3.fromRGB(0, 0, 0)
+                       end
+                   end
+               end
+           end
+           if ThemeMode == "Purple" then
+               LPlayer.PlayerGui.MainUIHolder.MenuBar.CashDisplay.TextColor3 = Color3.fromRGB(150,0,150) -- Cash
+               else if ThemeMode == "Red" then
+                   LPlayer.PlayerGui.MainUIHolder.MenuBar.CashDisplay.TextColor3 = Color3.fromRGB(201, 0, 0) -- Cash
+                   else if ThemeMode == "Green" then
+                       LPlayer.PlayerGui.MainUIHolder.MenuBar.CashDisplay.TextColor3 = Color3.fromRGB(93, 233, 0) -- Cash
+                       else if ThemeMode == "White" then
+                           LPlayer.PlayerGui.MainUIHolder.MenuBar.CashDisplay.TextColor3 = Color3.fromRGB(255, 255, 255) -- Cash
+                       end
+                   end
+               end
+           end
+           if LPlayer.PlayerGui.MainUIHolder:FindFirstChild("MenuBar") then
+               for i,v in pairs(LPlayer.PlayerGui.MainUIHolder.MenuBar:GetChildren()) do
+                   if v.ClassName == "ImageButton" then
+                       v.ImageColor3 = Color3.fromRGB(35,35,35)
+                   end    
+               end        
+           end 
+       end
+   end
+end
+function playerNotify(x)
+    if x then
+        playerJoin = Players.ChildAdded:Connect(function(player)
+            notify("Player Joined",player.Name)    
+        end)
+        playerLeft = Players.ChildRemoved:Connect(function(player)
+            notify("Player Left",player.Name)    
+        end)
+    else
+        playerJoin:Disconnect()
+        playerLeft:Disconnect()
+    end
+end
+function tpCar(seat,Cframe,tpBack)       
+    if seat.Parent:FindFirstChild("VehicleSeat") and not seat:FindFirstChild("SeatWeld") then   
+        seat.Disabled = false
+
+        repeat wait(.10)
+            LPlayer.Character.HumanoidRootPart.CFrame = seat.CFrame          
+        until seat:FindFirstChild('SeatWeld') or not seat.Parent:FindFirstChild('VehicleSeat')
+
+        wait()        
+        LPlayer.Character.Humanoid.SeatPart.Parent:SetPrimaryPartCFrame(Cframe)
+        wait(.5)
+        LPlayer.Character:FindFirstChild("Humanoid").Sit = false
+        wait()
+        LPlayer.Character:FindFirstChildOfClass("Humanoid").Jump = true
+        if tpBack then
+            wait()
+            LPlayer.Character.HumanoidRootPart.CFrame = oldCFrame
+        end
+    end      
+end
+function getRoot(char)
+    local rootPart = char:FindFirstChild('HumanoidRootPart') or char:FindFirstChild('Torso') or char:FindFirstChild('UpperTorso')
+    return rootPart
+end
+local function amogus()
+    LPlayer.Character.UpperTorso.Waist:Destroy()
+    local origin = LPlayer.Character.HumanoidRootPart.CFrame
+    LPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(2114.14697, -83.3234253, -1407.88184)
+    game:GetService("ReplicatedStorage")["_CS.Events"].EquipAvatarItem:FireServer("CustomCloth",6431115067)
+    game:GetService("ReplicatedStorage")["_CS.Events"].EquipAvatarItem:FireServer("CustomCloth",6164520667)
+    game:GetService("ReplicatedStorage")["_CS.Events"].EquipAvatarItem:FireServer("Color",Color3.new(1,0,0),"SkinColor")
+    wait()
+    LPlayer.Character.UpperTorso.Waist:Destroy()
+    wait(.5)
+    LPlayer.Character.Head.Anchored = true
+    getRoot(LPlayer.Character).CFrame = origin
+end     
+local function anonymous()
+    local originalskin = LPlayer.Character.Head.Color
+    game:GetService("ReplicatedStorage")["_CS.Events"].EquipAvatarItem:FireServer("Color",Color3.new(0,0,0),"SkinColor")
+    for i,v in pairs(LPlayer.Character:GetDescendants()) do
+        if v:IsA("Clothing") or v:IsA("ShirtGraphic") then
+            v:Destroy()
         end
     end
-    table.clear(ChamCache)
-end
-local function UpdateChams()
-    ClearChamCache()
-    if Anomiss.Visuals.Enables.Chams.Enabled then
-        for i,v in next, Players:GetChildren() do
-            if v ~= LocalPlayer and v.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and v.Character:FindFirstChild("HumanoidRootPart") then         
-                local distance = (LocalPlayer.Character.HumanoidRootPart.Position-v.Character.HumanoidRootPart.Position).Magnitude   
-                if distance <= Anomiss.Visuals.MaxDistance then                  
-                    ChamPlayer(v)                
+    LPlayer.Character.UpperTorso.Waist:Destroy()
+    spawn(function()
+        LPlayer.Character.Humanoid.Changed:Connect(function(p)
+            if p == "Health" then
+                if LPlayer.Character.Humanoid.Health <= 0 then
+                    game:GetService("ReplicatedStorage")["_CS.Events"].EquipAvatarItem:FireServer("Color",originalskin,"SkinColor")
+                    return
                 end
             end
-        end
-    end
+        end)
+        LPlayer.CharacterAdded:Connect(function()
+            game:GetService("ReplicatedStorage")["_CS.Events"].EquipAvatarItem:FireServer("Color",originalskin,"SkinColor")
+            return
+        end)
+    end)
 end
-local function StartFly()  
+
+FLYING = false
+QEfly = true
+iyflyspeed = 2
+vehicleflyspeed = 2
+function startFly()  
     if game.Workspace:FindFirstChild('ABC') ~= nil then game.Workspace:FindFirstChild('ABC'):Destroy() end
     local part = Instance.new('Part')
     part.Parent = workspace
     part.Name = "ABC"
-    part.CFrame = LocalPlayer.Character.HumanoidRootPart.CFrame
+    part.CFrame = LPlayer.Character.HumanoidRootPart.CFrame
     part.Transparency = 1
     part.CanCollide = false
-    part.Size = LocalPlayer.Character.HumanoidRootPart.Size
+    part.Size = LPlayer.Character.HumanoidRootPart.Size
     local weld = Instance.new('WeldConstraint')
-    weld.Parent = LocalPlayer.Character
-    weld.Part0 = LocalPlayer.Character.HumanoidRootPart
+    weld.Parent = LPlayer.Character
+    weld.Part0 = LPlayer.Character.HumanoidRootPart
     weld.Part1 = workspace.ABC
-
-	repeat wait() until LocalPlayer and LocalPlayer.Character and workspace.ABC and LocalPlayer.Character:FindFirstChild('Humanoid')
-	repeat wait() until Mouse
-    
+	repeat wait() until LPlayer and LPlayer.Character and workspace.ABC and LPlayer.Character:FindFirstChild('Humanoid')
+	repeat wait() until mouse
 	if flyKeyDown or flyKeyUp then flyKeyDown:Disconnect() flyKeyUp:Disconnect() end
 
 	local CONTROL = {F = 0, B = 0, L = 0, R = 0, Q = 0, E = 0}
@@ -329,11 +427,10 @@ local function StartFly()
 		BG.cframe = workspace.CurrentCamera.CoordinateFrame
 		BV.velocity = Vector3.new(0, 0, 0)
 		BV.maxForce = Vector3.new(9e9, 9e9, 9e9)
-
 		spawn(function()
 			repeat wait()
-				if not yes and LocalPlayer.Character:FindFirstChildOfClass('Humanoid') then
-					LocalPlayer.Character.Humanoid.PlatformStand = false
+				if not yes and LPlayer.Character:FindFirstChildOfClass('Humanoid') then
+					LPlayer.Character.Humanoid.PlatformStand = false
 				end
 			 	if CONTROL.L + CONTROL.R ~= 0 or CONTROL.F + CONTROL.B ~= 0 or CONTROL.Q + CONTROL.E ~= 0 then
 					SPEED = 50
@@ -355,33 +452,32 @@ local function StartFly()
 			SPEED = 0
 			BG:Destroy()
 			BV:Destroy()
-			if LocalPlayer.Character:FindFirstChildOfClass('Humanoid') then
-				LocalPlayer.Character.Humanoid.PlatformStand = false
+			if LPlayer.Character:FindFirstChildOfClass('Humanoid') then
+				LPlayer.Character.Humanoid.PlatformStand = false
 				workspace:FindFirstChild('ABC'):Destroy()
-				LocalPlayer.Character.WeldConstraint:Destroy()
+				LPlayer.Character.WeldConstraint:Destroy()
 			end
 		end)
-
 	end
 
-	flyKeyDown = Mouse.KeyDown:Connect(function(KEY)
+	flyKeyDown = mouse.KeyDown:Connect(function(KEY)
 		if KEY:lower() == 'w' then
-			CONTROL.F = (vfly and FlightSpeed or FlightSpeed)
+			CONTROL.F = (vfly and vehicleflyspeed or iyflyspeed)
 		elseif KEY:lower() == 's' then
-			CONTROL.B = - (vfly and FlightSpeed or FlightSpeed)
+			CONTROL.B = - (vfly and vehicleflyspeed or iyflyspeed)
 		elseif KEY:lower() == 'a' then
-			CONTROL.L = - (vfly and FlightSpeed or FlightSpeed)
+			CONTROL.L = - (vfly and vehicleflyspeed or iyflyspeed)
 		elseif KEY:lower() == 'd' then 
-			CONTROL.R = (vfly and flySpeed or FlightSpeed)
-		elseif KEY:lower() == 'e' then
-			CONTROL.Q = (vfly and FlightSpeed or FlightSpeed) * 2
-		elseif KEY:lower() == 'q' then
-			CONTROL.E = -(vfly and FlightSpeed or FlightSpeed) * 2
+			CONTROL.R = (vfly and flySpeed or iyflyspeed)
+		elseif QEfly and KEY:lower() == 'e' then
+			CONTROL.Q = (vfly and vehicleflyspeed or iyflyspeed)*2
+		elseif QEfly and KEY:lower() == 'q' then
+			CONTROL.E = -(vfly and vehicleflyspeed or iyflyspeed)*2
 		end
 		pcall(function() workspace.CurrentCamera.CameraType = Enum.CameraType.Track end)
 	end)
     
-	flyKeyUp = Mouse.KeyUp:Connect(function(KEY)
+	flyKeyUp = mouse.KeyUp:Connect(function(KEY)
 		if KEY:lower() == 'w' then
 			CONTROL.F = 0
 		elseif KEY:lower() == 's' then
@@ -399,1168 +495,1402 @@ local function StartFly()
 
 	FLY()   
 end
-local function StopFly()
+function stopFly()
 	FLYING = false
 	if flyKeyDown or flyKeyUp then flyKeyDown:Disconnect() flyKeyUp:Disconnect() end
-	if LocalPlayer.Character:FindFirstChildOfClass('Humanoid') then
-		LocalPlayer.Character:FindFirstChildOfClass('Humanoid').PlatformStand = false
+	if LPlayer.Character:FindFirstChildOfClass('Humanoid') then
+		LPlayer.Character:FindFirstChildOfClass('Humanoid').PlatformStand = false
 	end
 	pcall(function() workspace.CurrentCamera.CameraType = Enum.CameraType.Custom end)
 end
-local function StopConnections()
-    local hum = LocalPlayer.Character:WaitForChild("HumanoidRootPart")
+function getMayor()
+    for i,v in pairs(Players:GetChildren()) do
+        if v == game:GetService("ReplicatedStorage").CurrentMayor.Value and game:GetService("ReplicatedStorage").CurrentMayor.Value ~= nil then
+            return v
+        end
+    end
+end
 
-    repeat wait() until hum.Anchored == false    
-    for i, v in next, getconnections(LocalPlayer.Character.DescendantAdded) do
-        v:Disable()
-    end    
-end 
-local function CustomNotify(title, text, backgroundColor, ismenu)
-	local Card = MessageCard:Clone()
-
-	if ismenu then
-		Card.Parent = LocalPlayer.PlayerGui:WaitForChild("MainMenu").Messages
-	else
-		Card.Parent = LocalPlayer.PlayerGui:WaitForChild("MainUIHolder").Messages;
-	end
-
-	if title == "" then
-		Card.TextLabel.Text = title..": "..text
-	else
-		Card.TextLabel.Text = text
+local xdisplay = {}
+function xdisplay:addItemDisplay(player)
+	if player.Character.UpperTorso:FindFirstChild("ItemDisplay") then		
+		player.Character.UpperTorso["ItemDisplay"]:Destroy()		
 	end	
+	local ItemDisplay = Instance.new("BillboardGui")	
+	local UIGridLayout = Instance.new("UIGridLayout")
 
-	Card.LocalScript.Disabled = false
-	Card.BackgroundColor3 = backgroundColor
-	LocalPlayer.PlayerGui.Notify:Play()
+	ItemDisplay.Name = "ItemDisplay"
+	ItemDisplay.Parent = player.Character.UpperTorso
+	ItemDisplay.Active = true
+	ItemDisplay.MaxDistance = 90
+	ItemDisplay.Size = UDim2.new(5, 0, 1.5, 0)
+	ItemDisplay.SizeOffset = Vector2.new(0.800000012, 1)
+    ItemDisplay.AlwaysOnTop = true
+
+	UIGridLayout.Parent = ItemDisplay
+	UIGridLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	UIGridLayout.CellPadding = UDim2.new(0.03, 0, 0.005, 0)
+	UIGridLayout.CellSize = UDim2.new(0.17, 0, 0.4, 0)
+
+    local insideDisplay = {}
+
+	function insideDisplay:addItem(name,imageId)
+      local Item = Instance.new("ImageButton")
+	   local ItemImage = Instance.new("ImageLabel")        
+		Item.Name = name
+		Item.Parent = ItemDisplay
+		Item.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		Item.BackgroundTransparency = 1.000
+		Item.BorderSizePixel = 0
+		Item.Position = UDim2.new(0.300000012, 0, 0.100000001, 0)
+		Item.Size = UDim2.new(1.5, 0, 1.5, 0)
+		Item.SizeConstraint = Enum.SizeConstraint.RelativeXX
+		Item.Image = "rbxassetid://4509767787"
+
+		ItemImage.Name = "ItemImage"
+		ItemImage.Parent = Item
+		ItemImage.AnchorPoint = Vector2.new(0, 0.5)
+		ItemImage.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		ItemImage.BackgroundTransparency = 1.000
+		ItemImage.Position = UDim2.new(0, 0, 0.5, 0)
+		ItemImage.Size = UDim2.new(1, 0, 1, 0)
+		ItemImage.Image = imageId
+	end    
+    return insideDisplay
 end
-
-CustomNotify("[Anomiss]", "Loading GUI", Color3.fromRGB(46, 46, 46), false)
-local locationNames = { "Unkown1","Safe 1","Safe 2","Safe 3","Airfield","Lobby room","Police","Hospital","Bank","Okby Steppe","Eastdike","Logs","Outlook","Arway","Pahrump","ATM 1","Tow yard","Gas station Eastdike"}
-local locationPositions = {
-    ["Unkown1"] = CFrame.new(34.3238869, -34.2613297, 62.5588074),
-    ["Safe 1"] = CFrame.new(2945.68628, -137.835602, -632.04187),
-    ["Safe 2"] = CFrame.new(1338.85901, 8.42657185, 697.082153),
-    ["Safe 3"] = CFrame.new(4300.32715, -59.3234367, -1883.43359),
-    ["Airfield"] = CFrame.new(1887.15381, -21.3613129, -35.1375847),    
-    ["Lobby room"] = CFrame.new(447.605194, -8.47341442, -1337.55042),
-    ["Police"] = CFrame.new(1613.58093, -62.9234428, -1276.74622),
-    ["Hospital"] = CFrame.new(1620.96814, -65.4234467, -1398.38928),    
-    ["Bank"] = CFrame.new(2046.23425, -67.4034424, -1436.45581),
-    ["Okby Steppe"] = CFrame.new(3821.61816, -2.04217649, -3285.22583),
-    ["Eastdike"] = CFrame.new(2718.69604, -3.83149028, -3638.85547),
-    ["Logs"] = CFrame.new(1275.26843, -18.4427071, -2766.00391),    
-    ["Outlook"] = CFrame.new(1645.70691, -27.104681, -1872.46082),
-    ["Arway"] = CFrame.new(1645.70691, -27.104681, -1872.46082),    
-    ["Pahrump"] = CFrame.new(-101.309013, 9.67657185, 23.9057484),
-    ["ATM 1"] = CFrame.new(754.357971, -19.4670086, -242.627563),
-    ["Tow yard"] = CFrame.new(364.241394, -3.38592649, -1720),
-    ["Gas station Eastdike"] = CFrame.new(364.241394, -3.38592649, -1720)
-}
-
-local function TeleportToLocation(location, bool)
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        if bool then
-            LocalPlayer.Character.HumanoidRootPart.CFrame = locationPositions[location]
-        else
-            LocalPlayer.Character.HumanoidRootPart.CFrame = location
+local function getImageId(item)
+    for i, v in pairs(itemList) do
+        if i == item.Name then
+            return v.ImageID;
         end
-    end
+    end 
 end
-
-local function ValidToolModel(toolModel)
-    if toolModel:FindFirstChild("PlayerWhoDropped") then
-        return false
-    end
-    if toolModel:FindFirstChild("Handle") then
-        local ToolBG = toolModel.Handle:FindFirstChild("ToolBG")
-        if ToolBG and ToolBG:FindFirstChild("ToolName") then
-            return true
-        else
-            return false
-        end
-    end
-
-    return false
-end
-
-local function GrabTool(toolModel)
-    if toolModel == nil then
-        CustomNotify("[Anomiss]", "Tool sniper error (Tool is nil)", Color3.fromRGB(200, 0, 0), false)
-        return
-    end
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        local OldCFrame = LocalPlayer.Character.HumanoidRootPart.CFrame
-        if toolModel:FindFirstChild("Handle") then
-            LocalPlayer.Character.HumanoidRootPart.CFrame = toolModel.Handle.CFrame
-            task.wait(.2)
-            CSEvents.Dropper:FireServer(toolModel, "PickUp")
-            task.wait(.2)
-            LocalPlayer.Character.HumanoidRootPart.CFrame = toolModel.Handle.CFrame
-            CSEvents.Dropper:FireServer(toolModel, "PickUp")
-            wait(.6)
-            LocalPlayer.Character.HumanoidRootPart.CFrame = OldCFrame
-        end
-    end
-end
-
-local function GrabToolFromName(name)
-    local count = 0
-    local tool = nil
-
-    for i,v in next, Entities:GetChildren() do
-        if count >= 1 then
-            break
-        end
-
-        if v.Name == "ToolModel" and ValidToolModel(v) and v:FindFirstChild("Handle") then
-            local toolName = v.Handle.ToolBG.ToolName.Value
-            if toolName == name then
-                count += 1
-                tool = v
-            end
-        end
-
-    end
-
-    GrabTool(tool)
-end
-
-local function PurchaseItems(name, quantity, isCrate)
-    if not isCrate then
-        for i = 1, quantity, 1 do 
-            task.wait(.2)   
-            CSEvents.PurchaseTeamItem:FireServer(name, "Single", nil)
-        end
-    else 
-        CSEvents.PurchaseTeamItem:FireServer(name,"Crate",nil)
-		CSEvents.DeliveryFunction:FireServer("PickUpDelivery",name)
-    end
-end
-
-local noclipConnection = nil
-local function ToggleNoclip()
-
-    local function ClipLoop()
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            for i,v in next, LocalPlayer.Character:GetDescendants() do
-                if v:IsA("BasePart") and v.CanCollide == true then
-                    if Anomiss.Movement.Noclip then
-                        v.CanCollide = false
-                    else
-                        v.CanCollide = true
-                    end
-                end
-            end
-        end
-    end
-
-    if noclipConnection == nil then
-        Settings.nocliploop = game:GetService("RunService").Stepped:Connect(ClipLoop)
-    end
-
-end
-
-local function GetCurrentGun()
-    if LocalPlayer.Character then
-		for i,v in next, LocalPlayer.Character:GetChildren() do
-			if v:IsA("Tool") and v:FindFirstChild("MainGunScript") then
-				return v
-			end
-		end
-	end
-end
-
-print("Loading | %40")
-print("Loading | %45 Loading UI Library")
--- Initialize Library
-local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Anomiss01/RS_wadwd/main/lib/library1"))({cheatname = 'Anomiss 1.0.2', gamename = 'Anomic Original [BETA]'}); 
-library:init();
-
--- Create New Window
-local window = library.NewWindow({title = library.cheatname..' | '..library.gamename, size = UDim2.new(0,525,0,650)})
-print("Loading | %47")
-
--- Hardcoded Settings Tab [Configs, Themes, Etc]
-local tab_settings = library:CreateSettingsTab(window)
-print("Loading | %48")
-
--- Create New Tab's
-local A_Tab = window:AddTab('Aimbot-Combat')
-local V_Tab = window:AddTab('Visuals')
-local M_Tab = window:AddTab('Miscellaneous')
-local L_Tab = window:AddTab('LocalPlayer')
-
--- Create Aimbot Tab
-local Aimbot = A_Tab:AddSection('Aimlock', 1) 
-local Aimbot_Settings = A_Tab:AddSection('Settings', 1) 
-local Silent_Aimbot = A_Tab:AddSection('Silent Aimbot', 2) 
-local Fov_Section = A_Tab:AddSection('FOV', 1) 
-local Gun_Section = A_Tab:AddSection('Gun Mods', 1) 
-
--- Create Local Tab
-local Local_Movement = L_Tab:AddSection('Movement', 1) 
-local Local_Misc = L_Tab:AddSection('Miscellaneous', 2) 
-local Local_Char = L_Tab:AddSection('Character', 2) 
-
--- Create Visauls Tab
-local PVisauls = V_Tab:AddSection('Player Visuals', 1) 
-local VSettings = V_Tab:AddSection('Visual Settings', 1) 
-local VPlayers = V_Tab:AddSection('Players', 2) 
-local VWSettings = V_Tab:AddSection('World Visuals', 2) 
-
--- Create Miscellaneous tab
-local ItemSectionMisc = M_Tab:AddSection('Tool sniper', 1) 
-local LocalTeleport = M_Tab:AddSection('Teleportation', 1) 
-local TeamSectionMisc = M_Tab:AddSection('Teams', 2) 
-
-print("Loading | %60 | Main tabs")
-
-do --// Aimbot main 
-    Aimbot:AddToggle({text = 'Enabled', flag = '', tooltip = 'Enables default aimbot.', callback = function(bool)
-        Anomiss.Aimbot.Enabled = bool
-    end})
-    Aimbot:AddSlider({text = 'Lock Speed', flag = '', tooltip = 'The speed of which the aimbot snaps.', min = 0, max = 1, increment = 0.01, callback = function(number)
-        Anomiss.Aimbot.AimSpeed = number
-    end})       
-
-    local silentToggle = Silent_Aimbot:AddToggle({text = 'Silent Aim', flag = '', tooltip = 'Enables silent aim.', callback = function(bool)
-        Anomiss.Aimbot.Silent_aim.Enabled = bool
-    end})
-    silentToggle:AddBind({mode = 'hold', default = Enum.KeyCode.F, callback = function(bool)
-        Anomiss.Aimbot.Silent_aim.Enabled = bool
-    end})
-    Silent_Aimbot:AddToggle({text = 'Auto Fire', flag = '', tooltip = 'Enables silent aim auto fire.', callback = function(bool)
-        Anomiss.Aimbot.Silent_aim.AutoFire = bool
-    end})    
-    Silent_Aimbot:AddList({text = 'Bullet Origin', flag = '', values = {'Called', 'MyHead', 'Camera', 'Teleport'}, callback = function(option)
-        Anomiss.Aimbot.Silent_aim.Origin = option
-    end})  
-
-    local beamToggle = Silent_Aimbot:AddToggle({text = 'Raycast tracers', flag = '', tooltip = 'Enables silent aim bullet beams.', callback = function(bool)
-        Anomiss.Aimbot.Silent_aim.Beams = bool
-    end}) 
-    beamToggle:AddColor({flag = '', default = Anomiss.Aimbot.Silent_aim.BeamProperties.Color, callback = function(c)
-        Anomiss.Aimbot.Silent_aim.BeamProperties.Color = c
-    end});
-    Silent_Aimbot:AddToggle({text = 'Print Calling script', flag = '', tooltip = 'Prints the calling script of ray.', callback = function(bool)
-        Anomiss.Aimbot.Silent_aim.PrintCallingScript = bool
-    end})
-    Silent_Aimbot:AddBox({text = 'Calling script', flag = 'aimbot_cscript', callback = function(input)
-        Anomiss.Aimbot.Silent_aim.CallingScript = input        
-    end})
-
-    Aimbot_Settings:AddList({text = 'Aimbot Part', flag = 'dropdown', tooltip = 'The part of which aimbot targets', values = {'Head', 'Torso', 'Random', 'Anti-God'}, callback = function(value)
-        Anomiss.Aimbot.HitPart = value
-    end})    
-    Aimbot_Settings:AddToggle({text = 'Visible Check', flag = '23d', tooltip = 'Checks if player is visible.', callback = function(bool)
-        Anomiss.Aimbot.Checks.Visible = bool
-    end})
-    Aimbot_Settings:AddToggle({text = 'Forcefield Check', flag = 'awd', tooltip = 'Checks if player has a forcefield.', callback = function(bool)
-        Anomiss.Aimbot.Checks.Forcefield = bool
-    end})    
-
-    local fovCircle = Fov_Section:AddToggle({text = 'FOV Circle', flag = 'x', tooltip = 'Enables fov circle for aimbot.', callback = function(bool)
-        Anomiss.Aimbot.FOV.Enabled = bool
-        if Anomiss.Aimbot.FOV.Enabled then
-            Fov_Circle = Drawing.new("Circle")
-            Fov_Circle.Visible = true
-            Fov_Circle.Color = Color3.fromRGB(0,0,200)
-            Fov_Circle.Radius = Anomiss.Aimbot.FOV.Radius
-            Fov_Circle.Thickness = 1
-            Fov_Circle.Filled = false
-            Fov_Circle.NumSides = 125
-        elseif not Anomiss.Aimbot.FOV.Enabled and Fov_Circle ~= nil then
-            Fov_Circle:Remove()
-        end
-    end}) 
-    fovCircle:AddColor({flag = '', default = Color3.fromRGB(0,0,200), callback = function(c)
-        Anomiss.Aimbot.FOV.Color = c
-    end});
-    Fov_Section:AddSlider({text = 'Radius', flag = 'Fov2x', tooltip = 'The aimbot fov radius.', min = 1, default = 120, max = 1000, increment = 1, callback = function(number)
-        Anomiss.Aimbot.FOV.Radius = number
-    end})
-    Fov_Section:AddSlider({text = 'Sides', flag = 'Fov2x1', min = 3, default = 120, max = 150, increment = 1, callback = function(number)
-        Anomiss.Aimbot.FOV.NumSides = number
-    end})
-    Fov_Section:AddList({text = 'Position', flag = 'AimbotFovPosition', values = {"Center", "Mouse"}, callback = function(option)
-        Anomiss.Aimbot.FOV.Position = option
-    end})
-
-    Gun_Section:AddToggle({text = 'Fire while flying', flag = 'AirShotToggle', tooltip = 'Shoot while flying.', callback = function(bool)
-        Anomiss.GunModifiers.FlightShot = bool
-    end})  
-end
-
-do --// LocalPlayer
-    Local_Movement:AddToggle({text = 'Infinite Jump', flag = '', tooltip = 'Enables Infinite jump.', callback = function(bool)
-        Anomiss.Movement.InfiniteJump = bool
-    end})
-    Local_Movement:AddToggle({text = 'Max slope angle', flag = '', tooltip = 'Helps you climb terrain and certain objects.', callback = function(bool)
-        if bool then
-            LocalPlayer.Character.Humanoid.MaxSlopeAngle = 90
-        elseif LocalPlayer.Character then
-            LocalPlayer.Character.Humanoid.MaxSlopeAngle = 45
-        end
-    end})
-    
-    local FlightToggle = Local_Movement:AddToggle({text = 'Flight', flag = '', tooltip = '', callback = function(bool)
-        Anomiss.Movement.Flying = bool
-        if Anomiss.Movement.Flying then
-            StartFly()
-        else
-            StopFly()
-        end
-    end})    
-    FlightToggle:AddBind({mode = 'toggle', callback = function(bool)
-        Anomiss.Movement.Flying = bool
-        if Anomiss.Movement.Flying then
-            StartFly()
-        else
-            StopFly()
-        end
-    end})
-
-    local NoclipToggle = Local_Movement:AddToggle({text = 'Noclip', flag = '', tooltip = '', callback = function(bool)
-        Anomiss.Movement.Noclip = bool
-        ToggleNoclip()
-    end})    
-    NoclipToggle:AddBind({mode = 'toggle', callback = function(bool)
-        Anomiss.Movement.Noclip = bool
-        ToggleNoclip()
-    end})
-
-    Local_Movement:AddSlider({text = 'Flight Speed', flag = 'FlightSpeed', tooltip = 'The speed at which flight travels.', default = 2, min = 1, max = 10, increment = 1, callback = function(number)
-        FlightSpeed = number
-    end})
-
-    Local_Movement:AddSeparator({text = "Movement Bypass"})
-    Local_Movement:AddToggle({text = 'Overide Movement', flag = '', callback = function(bool)
-        Anomiss.Movement.Overide = bool
-    end})
-    Local_Movement:AddSlider({text = 'Walkspeed', flag = '', tooltip = 'Your walk speed.', default = 13, min = 1, max = 250, increment = 1, callback = function(number)
-        Anomiss.Movement.Walkspeed = number
-    end})
-    Local_Movement:AddSlider({text = 'Run Speed', flag = '', tooltip = 'Your running speed.', default = 23, min = 1, max = 250, increment = 1, callback = function(number)
-        Anomiss.Movement.RunSpeed = number
-    end})
-    Local_Movement:AddSlider({text = 'Jump Power', flag = '', tooltip = 'Your jump height.', default = 30, min = 1, max = 250, increment = 1, callback = function(number)
-        Anomiss.Movement.jumppower = number
-    end})
-    
-    Local_Misc:AddToggle({text = 'Overide FOV', flag = '', tooltip = 'Overides fov incase game changes it.', callback = function(bool)
-        fovOveride = bool
-    end})
-    Local_Misc:AddSlider({text = 'Field of view', flag = '', tooltip = 'Camera field of view.', min = 0.5, max = 120, increment = 1, callback = function(number)
-        fovValue = number
-        CCamera.FieldOfView = number
-    end}) 
-
-    Local_Misc:AddSeparator({text = "Camera Offsetting"})
-    Local_Misc:AddToggle({text = 'Camera Offset', flag = '', tooltip = 'Overides camera to make thirdperson.', callback = function(bool)
-        Anomiss.Visuals.Other.Thirdperson = bool
-    end})
-    Local_Misc:AddSlider({text = 'Cam offset X', flag = '', tooltip = 'Camera offset.', min = -30, max = 30, increment = 0.5, callback = function(number)
-        Anomiss.Visuals.Other.ThirdpersonX = number
-    end})
-    Local_Misc:AddSlider({text = 'Cam offset Y', flag = '', tooltip = 'Camera offset.', min = -30, max = 30, increment = 0.5, callback = function(number)
-        Anomiss.Visuals.Other.ThirdpersonY = number
-    end})
-    Local_Misc:AddSlider({text = 'Cam offset Z', flag = '', tooltip = 'Camera offset.', min = -30, max = 30, increment = 0.5, callback = function(number)
-        Anomiss.Visuals.Other.ThirdpersonZ = number
-    end})
-
-    Local_Char:AddSeparator({text = "Appearence"})
-    Local_Char:AddToggle({text = 'Outfit editor', flag = '', tooltip = '', callback = function(bool)
-        LocalPlayer.PlayerGui.AvatarEditor.Enabled = bool
-        LocalPlayer.PlayerGui.AvatarEditor.WearButton.Visible = not bool
-    end})
-    Local_Char:AddList({text = 'Outfit Presets', flag = '', values = {"Black", "Glitch", "Black Super", "Jedi", "Black & White", "Hacker"}, callback = function(t)
-        if t == "Black" then
-            CSEvents.EquipAvatarItem:FireServer("CustomCloth",6523367474)
-            CSEvents.EquipAvatarItem:FireServer("CustomCloth",745499244)
-            CSEvents.EquipAvatarItem:FireServer("Color",Color3.fromRGB(61, 48, 40),"HairColor")   
-            CSEvents.EquipAvatarItem:FireServer("Color",Color3.fromRGB(255, 255, 255),"SkinColor")  --// else if..
-            else if t == "Glitch" then
-                    CSEvents.EquipAvatarItem:FireServer("CustomCloth",6296322488)
-                    CSEvents.EquipAvatarItem:FireServer("CustomCloth",6296389518)
-                else if t == "Hacker" then
-                    CSEvents.EquipAvatarItem:FireServer("CustomCloth",5594922955)
-                    CSEvents.EquipAvatarItem:FireServer("CustomCloth",6967030358)
-                    else if t == "Black & White"  then
-                        CSEvents.EquipAvatarItem:FireServer("CustomCloth",4797295258)
-                        CSEvents.EquipAvatarItem:FireServer("CustomCloth",4977671127)
-                        CSEvents.EquipAvatarItem:FireServer("Color",Color3.fromRGB(61, 48, 40),"HairColor")   
-                                CSEvents.EquipAvatarItem:FireServer("Color",Color3.fromRGB(234, 184, 146),"SkinColor")
-                        else if t == "Black Super"  then
-                            CSEvents.EquipAvatarItem:FireServer("CustomCloth",5424698549)
-                            CSEvents.EquipAvatarItem:FireServer("CustomCloth",6585862428)                                     
-                            else if t == "Jedi"  then
-                                CSEvents.EquipAvatarItem:FireServer("CustomCloth",5234814023)
-                                CSEvents.EquipAvatarItem:FireServer("CustomCloth",5234818204)     
-                                CSEvents.EquipAvatarItem:FireServer("Color",Color3.fromRGB(61, 48, 40),"HairColor")   
-                                CSEvents.EquipAvatarItem:FireServer("Color",Color3.fromRGB(234, 184, 146),"SkinColor")              
-                            end                                    
-                        end
-                    end
-                end
-            end
-        end
-    end})
-    Local_Char:AddColor({text = "Hair color", flag = '', default = Color3.fromRGB(255, 255, 255), callback = function(c)
-        CSEvents.EquipAvatarItem:FireServer("Color", c, "HairColor")
-    end})
-    Local_Char:AddColor({text = "Skin color", flag = '', default = Color3.fromRGB(255, 255, 255), callback = function(c)
-        CSEvents.EquipAvatarItem:FireServer("Color", c, "SkinColor")
-    end})
-    Local_Char:AddButton({text = 'Untradeable', callback = function()
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            LocalPlayer.Character.HumanoidRootPart.LocalPlayerBG:Destroy()
-        end
-    end})
-    Local_Char:AddButton({text = 'Force respawn', callback = function()
-        CSEvents.PayLoad:FireServer()
-    end})
-
-
-    Local_Char:AddSeparator({text = "Antiaim"})
-    Local_Char:AddToggle({text = 'Anti-Aim', flag = '', callback = function(bool)
-        Anomiss.Visuals.Other.AA_Enabled = bool
-        if not bool and LocalPlayer.Character.PrimaryPart then
-            LocalPlayer.Character.Humanoid.AutoRotate = true
-        end
-    end})
-    Local_Char:AddList(  {text = 'AA Mode', flag = '', default == 'spin', values = {'Spin', 'Custom'}, callback = function(option)
-        Anomiss.Visuals.Other.AA_Mode = option
-    end})
-    Local_Char:AddSlider({text = 'Spin Speed', flag = '', tooltip = 'How fast the character spins.', min = -30, max = 30, increment = 0.1, callback = function(number)
-        Anomiss.Visuals.Other.SpinSpeed = number
-    end})    
-
-end
-
-do --// Visuals
-    local mainToggle = PVisauls:AddToggle({text = 'Enabled', flag = '', callback = function(bool)
-        espLib.options.enabled = bool
-    end}) mainToggle:AddColor({flag = '', default = Color3.fromRGB(255, 255, 255), callback = function(c)
-        espLib.options.nameColor = c 
-        espLib.options.boxesColor = c
-        espLib.options.outOfViewArrowsColor = c
-        espLib.options.tracerColor = c
-        espLib.options.distanceColor = c
-    end})
-    local targetToggle = PVisauls:AddToggle({text = 'Target Highlight', flag = '', callback = function(bool)
-        Anomiss.Visuals.Enables.TargetHighlight = bool
-    end}) targetToggle:AddColor({flag = 'xcv', default = Color3.fromRGB(255,0,0), callback = function(c)
-        espLib.options.whitelistColor = c
-    end})
-    PVisauls:AddToggle({text = 'Nametags', flag = '', callback = function(bool)
-        espLib.options.names = bool
-    end})
-    PVisauls:AddToggle({text = 'Distance', flag = '', callback = function(bool)
-        espLib.options.distance = bool
-    end})
-    PVisauls:AddToggle({text = 'Boxes', flag = '', callback = function(bool)
-        espLib.options.boxes = bool
-    end})
-    PVisauls:AddToggle({text = 'Healthbars', flag = '', callback = function(bool)
-        espLib.options.healthBars = bool        
-    end})
-    PVisauls:AddToggle({text = 'Tracers', flag = '', callback = function(bool)
-        espLib.options.tracers = bool
-    end})
-    PVisauls:AddToggle({text = 'OutOfView arrows', flag = '', callback = function(bool)
-        espLib.options.outOfViewArrows = bool
-        espLib.options.outOfViewArrowsOutline = bool
-        espLib.options.outOfViewArrowsFilled = bool       
-    end})
-
-    PVisauls:AddSeparator({text = "Chams"})
-    local ChamToggle = PVisauls:AddToggle({text = 'Chams', flag = '', callback = function(bool)
-        Anomiss.Visuals.Enables.Chams.Enabled = bool
-        
-    end}) 
-    ChamColorPicker = ChamToggle:AddColor({flag = 'ChamColor', default = Color3.fromRGB(200,0,0), callback = function(c)
-        Anomiss.Visuals.Enables.Chams.Color = c
-    end})
-    PVisauls:AddSlider({text = 'Transparency', flag = '', tooltip = '', min = 0, max = 1, default = 0.5, increment = 0.05, callback = function(number)
-        Anomiss.Visuals.Enables.Chams.Transparency = number
-    end})
-    PVisauls:AddSlider({text = 'Outline Transparency', flag = '', tooltip = '', default = 0, min = 0, max = 1, increment = 0.05, callback = function(number)
-        Anomiss.Visuals.Enables.Chams.OutlineTransparency = number
-    end})
-    PVisauls:AddToggle({text = 'Rainbow Chams', flag = 'RChams', callback = function(bool)
-        Anomiss.Visuals.Enables.Chams.Rainbow = bool
-    end})
-    
-
-    local playerlist = {}
-    local selectedPlayer = nil
-    local nameLabel;
-    local ageLabel;
-    local teamLabel;
-    local healthLabel;
-    
-    local function RefreshStats()
-        if selectedPlayer ~= nil and selectedPlayer.Character then
-            nameLabel:SetText("Name: "..selectedPlayer.Name)
-            ageLabel:SetText("Account Age: "..tostring(selectedPlayer.AccountAge))
-            teamLabel:SetText("Team: "..tostring(selectedPlayer.Team))        
-    
-            if selectedPlayer.Character.Humanoid then
-                healthLabel:SetText("Health: "..tostring(selectedPlayer.Character.Humanoid.Health))           
-            end
-    
+local function refreshDisplay(plr)                  
+    local itemDisplay = xdisplay:addItemDisplay(plr)  
+    for _,x in pairs(plr.Backpack:GetChildren()) do
+        if x.ClassName == "Tool" then
+            itemDisplay:addItem(x.Name,getImageId(x))    			     
         end
     end     
+end
 
-    for i,v in next,Players:GetPlayers() do 
-        if v ~= LocalPlayer then
-            table.insert(playerlist, v.Name)    
+bypass()
+
+ASection1:addToggle("Toggle Hitboxes", nil, function(v)
+    Hitboxes = v
+end)
+ASection1:addSlider("Hitbox Size", 1, 0, 55, function(v)
+    headHitboxSize = v
+end)
+ASection1:addSlider("Hitbox Transparency", hitboxTransparency, 0, 1, function(v)
+    hitboxTransparency = v
+end)
+ASection2:addToggle("Ghost Shotgun", nil, function(x)   
+    shotgunMod1 = x    
+    bypass()
+end)
+ASection2:addToggle("Rapid Shotgun", nil, function(x)   
+    SpeedShotgun = x        
+end)
+ASection2:addDropdown("Rapid Mode", {"Maximum", "Medium", "Low"}, function(x)
+    if x == "Maximum" then
+        SpeedSDelay = 0.00001
+        else if x == "Medium" then
+            SpeedSDelay = 0.1
+            else if x == "Low" then
+                SpeedSDelay = 0.4
+            end
         end
+    end
+end)
+ASection2:addButton("No shotgun reload", function()    
+    for i, v in pairs(itemList) do
+        if v.DataType == "RangedWeapon" and v.Firemode == "Shot" then                         
+            v.ReloadTime = 0.01                       
+        end 
     end    
-    local PlayerList = VPlayers:AddList({text = 'Target Player', flag = '', tooltip = 'Select player of choice.', values = playerlist, callback = function(value)
-        selectedPlayer = PlayerFromName(value); 
-        RefreshStats()
-    end})
-    Players.PlayerAdded:Connect(function(player)
-       PlayerList:AddValue(tostring(player.Name))
-    end)
-    Players.PlayerRemoving:Connect(function(player)
-        PlayerList:RemoveValue(tostring(player.Name))           
-    end)
-
-    local isSpectating = false    
-    VPlayers:AddToggle({text = 'Spectate', flag = '', callback = function(bool)
-        isSpectating = bool
-        if isSpectating and selectedPlayer and selectedPlayer.Character and selectedPlayer.Character:FindFirstChild("Humanoid") then
-            repeat                
-                CCamera.CameraSubject = selectedPlayer.Character.Humanoid                           
-                task.wait(0.4)
-            until not isSpectating      
-        elseif LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then       
-            CCamera.CameraSubject = LocalPlayer.Character.Humanoid           
-        end        
-    end})
-
-    VPlayers:AddButton({text = 'Teleport to', callback = function()
-        if selectedPlayer.Character and selectedPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            TeleportToLocation(selectedPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0,1,0), false)
-        end
-    end})
-
-    nameLabel = VPlayers:AddText({text = "Name: "})
-    ageLabel = VPlayers:AddText({text = "Account Age: "})
-    teamLabel = VPlayers:AddText({text = "Team: "})
-    healthLabel = VPlayers:AddText({text = "Health: "})       
-
-    VSettings:AddSlider({text = 'Max distance', flag = '', tooltip = 'Distance at which esp is drawn.', default = 500, min = 1, max = 3000, increment = 1, callback = function(number)
-        espLib.options.maxDistance = number
-        Anomiss.Visuals.MaxDistance = number
-    end})
-    
-    local Aimbient1 = VWSettings:AddToggle({text = 'Aimbient', flag = '', callback = function(bool)
-        Anomiss.Visuals.Enables.Aimbient = bool
-        if Anomiss.Visuals.Enables.Aimbient then
-            repeat task.wait(0.0001)
-                game.Lighting.Ambient = Anomiss.Visuals.Colors.Aimbient
-            until not Anomiss.Visuals.Enables.Aimbient
-        end
-    end})  Aimbient1:AddColor({flag = '', default = game.Lighting.Ambient, callback = function(c)
-        Anomiss.Visuals.Colors.Aimbient = c
-    end})
-    local Aimbient2 = VWSettings:AddToggle({text = 'Outdoor Aimbient', flag = '', callback = function(bool)
-        Anomiss.Visuals.Enables.OutDoorAimbient = bool
-        if Anomiss.Visuals.Enables.OutDoorAimbient then
-            repeat task.wait(0.0001)
-                game.Lighting.OutdoorAmbient = Anomiss.Visuals.Colors.OutDoorAimbient
-            until not Anomiss.Visuals.Enables.OutDoorAimbient
-        end
-    end})  Aimbient2:AddColor({flag = '', default = game.Lighting.OutdoorAmbient, callback = function(c)
-        Anomiss.Visuals.Colors.OutDoorAimbient = c
-    end})
-    local GrassToggle = VWSettings:AddToggle({text = 'Grass Color', flag = '', callback = function(bool)
-        Anomiss.Visuals.Enables.Terrain = bool
-        if Anomiss.Visuals.Enables.Terrain then
-            repeat task.wait(0.0001)
-                workspace.Terrain:SetMaterialColor(Anomiss.Visuals.Colors.TerrainGrassMaterial, Anomiss.Visuals.Colors.TerrainGrassColor)
-            until not Anomiss.Visuals.Enables.Terrain
-        end
-    end})  GrassToggle:AddColor({flag = '', default = Anomiss.Visuals.Colors.TerrainGrassColor, callback = function(c)
-        Anomiss.Visuals.Colors.TerrainGrassColor = c
-    end})
-    local TerrainGroundToggle = VWSettings:AddToggle({text = 'Ground Color', flag = '', callback = function(bool)
-        Anomiss.Visuals.Enables.TerrainGround = bool
-        if Anomiss.Visuals.Enables.TerrainGround then
-            repeat task.wait(0.0001)
-                workspace.Terrain:SetMaterialColor(Anomiss.Visuals.Colors.TerrainGroundMaterial, Anomiss.Visuals.Colors.TerrainGroundColor)
-            until not Anomiss.Visuals.Enables.TerrainGround
-        end
-    end})  TerrainGroundToggle:AddColor({flag = '', default = Anomiss.Visuals.Colors.TerrainGroundColor, callback = function(c)
-        Anomiss.Visuals.Colors.TerrainGroundColor = c
-    end})
-    VWSettings:AddToggle({text = 'Global Shadows', default = game.Lighting.GlobalShadows, flag = '', callback = function(bool)
-        Anomiss.Visuals.Enables.Shadows = bool
-        game.Lighting.GlobalShadows = Anomiss.Visuals.Enables.Shadows
-    end})
-    VWSettings:AddToggle({text = 'Remove Decoration', flag = '', callback = function(bool)
-        Anomiss.Visuals.Enables.HiddenGrass = bool
-        sethiddenprop(workspace.Terrain, "Decoration", not Anomiss.Visuals.Enables.HiddenGrass)
-    end})
-    VWSettings:AddSlider({text = 'Exposure Compensation', flag = '', tooltip = '', min = 0, max = 15, increment = 0.1, callback = function(number)
-        game.Lighting.ExposureCompensation = number
-    end})
-end
-
-do --// Miscellaneous
-    local GunList = game:GetService("ReplicatedStorage"):WaitForChild("_CS.Events").GetList:Invoke()
-    local SemiWeapons = {Names = {}}
-    local AutoWeapons = {Names = {}}
-    local ShotWeapons = {Names = {}}   
-    local Logger = false
-    local GunSemiList; local selectedSemi;
-    local GunAutoList; local selectedAuto;
-    local ShotGunList; local selectedShotty;
-
-
-    for i,v in next, Entities:GetChildren() do
-        if v.Name == "ToolModel" and ValidToolModel(v) then
-            local toolName = v.Handle.ToolBG.ToolName.Value
-
-            if GunList[toolName] and GunList[toolName].Firemode then
-                if GunList[toolName].Firemode == "Auto" and not table.find(AutoWeapons.Names, toolName) then                    
-                    table.insert(AutoWeapons.Names, toolName)        
-                elseif GunList[toolName].Firemode == "Semi" and not table.find(SemiWeapons.Names, toolName) then                    
-                    table.insert(SemiWeapons.Names, toolName)  
-                elseif GunList[toolName].Firemode == "Shot" and not table.find(ShotWeapons.Names, toolName) then                    
-                    table.insert(ShotWeapons.Names, toolName)
-                end
-            end  
-                          
-        end
-    end
-
-    local AButton, SAButton, SButton
-
-    --// Semi
-    GunSemiList = ItemSectionMisc:AddList({text = "Semi's in server", flag = '', tooltip = '', values = SemiWeapons.Names, callback = function(value)
-        selectedSemi = value
-        SAButton:SetText("Grab: ["..selectedSemi.."]")
-    end}) SAButton = ItemSectionMisc:AddButton({text = 'Grab none', callback = function()
-        GrabToolFromName(selectedSemi)
-    end})   
-    
-    --// Rifle
-    GunAutoList = ItemSectionMisc:AddList({text = "Auto's in server", flag = '', tooltip = '', values = AutoWeapons.Names, callback = function(value)
-        selectedAuto = value
-        AButton:SetText("Grab: ["..selectedAuto.."]")
-    end}) AButton = ItemSectionMisc:AddButton({text = 'Grab none', callback = function()
-        GrabToolFromName(selectedAuto)
-    end})
-
-    --// Shotgun  
-    ShotGunList = ItemSectionMisc:AddList({text = "Shotgun's in server", flag = '', tooltip = '', values = ShotWeapons.Names, callback = function(value)
-        selectedShotty = value
-        SButton:SetText("Grab: ["..selectedShotty.."]")
-    end}) SButton =  ItemSectionMisc:AddButton({text = 'Grab none', callback = function()
-        GrabToolFromName(selectedShotty)
-    end})
-
-    ItemSectionMisc:AddToggle({text = 'Drop logger', flag = '', tooltip = '', callback = function(bool)
-        Logger = bool
-    end})
-
-    Entities.ChildAdded:Connect(function(Model)
-        task.wait(0.6)
-        if Model.Name == "ToolModel" and ValidToolModel(Model) then
-            local toolName = Model:WaitForChild("Handle", 100).ToolBG.ToolName.Value
-
-            if GunList[toolName] and GunList[toolName].Firemode then
-                if GunList[toolName].Firemode == "Auto"  then         
-                    if not table.find(AutoWeapons.Names, toolName) then
-                        table.insert(AutoWeapons.Names, toolName)     
-                        if Logger then
-                            CustomNotify("[Anomiss Logger]", "Auto weapon dropped: ["..toolName.."]", Color3.fromRGB(110, 110, 110), false)
-                        end                   
-                    end
-                elseif GunList[toolName].Firemode == "Semi" then           
-                    if not table.find(SemiWeapons.Names, toolName) then
-                        table.insert(SemiWeapons.Names, toolName)   
-                        if Logger then
-                            CustomNotify("[Anomiss Logger]", "Semi weapon dropped: ["..toolName.."]", Color3.fromRGB(110, 110, 110), false)
-                        end                    
-                    end        
-                elseif GunList[toolName].Firemode == "Shot" and not table.find(ShotWeapons.Names, toolName) then  
-                    if not table.find(ShotWeapons.Names, toolName) then
-                        table.insert(ShotWeapons.Names, toolName)      
-                        if Logger then
-                            CustomNotify("[Anomiss Logger]", "Shotgun dropped: ["..toolName.."]", Color3.fromRGB(110, 110, 110), false)
-                        end                       
-                    end      
-                end
-            end 
-        end
-    end)
-    Entities.ChildRemoved:Connect(function(Model)
-        if Model.Name == "ToolModel" and ValidToolModel(Model) then
-            local toolName = Model.Handle.ToolBG.ToolName.Value
-
-            if GunList[toolName] and GunList[toolName].Firemode then
-                if GunList[toolName].Firemode == "Auto" then                    
-                    local tempTable = {}
-                    for i,v in next, Entities:GetChildren() do
-                        if v.Name == "ToolModel" and ValidToolModel(v) then
-                            local tempName = Model.Handle.ToolBG.ToolName.Value
-                            if tempName == toolName then
-                                table.insert(tempTable, tempName)
-                            end
-                        end
-                    end                    
-                    if #tempTable >= 2 then            
-                        if table.find(AutoWeapons.Names, toolName) then                            
-                            table.remove(AutoWeapons.Names, table.find(AutoWeapons.Names, toolName))
-                        end                                                                          
-                    end
-                elseif GunList[toolName].Firemode == "Semi" then                    
-                    local tempTable = {}
-                    for i,v in next, Entities:GetChildren() do
-                        if v.Name == "ToolModel" and ValidToolModel(v) then
-                            local tempName = Model.Handle.ToolBG.ToolName.Value
-                            if tempName == toolName then                                
-                                table.insert(tempTable, tempName)
-                            end
-                        end
-                    end                    
-                    if #tempTable >= 2 then                              
-                        if table.find(SemiWeapons.Names, toolName) then                          
-                            table.remove(SemiWeapons.Names, table.find(SemiWeapons.Names, toolName))
-                        end                                                                                        
-                    end
-                elseif GunList[toolName].Firemode == "Shot" then                    
-                    local tempTable = {}
-                    for i,v in next, Entities:GetChildren() do
-                        if v.Name == "ToolModel" and ValidToolModel(v) then
-                            local tempName = Model.Handle.ToolBG.ToolName.Value
-                            if tempName == toolName then
-                                table.insert(tempTable, tempName)
-                            end
-                        end
-                    end                    
-                    if #tempTable >= 2 then                   
-                        if table.find(ShotWeapons.Names, toolName) then                         
-                            table.remove(ShotWeapons.Names, table.find(ShotWeapons.Names, toolName))
-                        end                                                                      
-                    end
-                end
-            end 
-
-        end
-    end)    
-    
-    TeamSectionMisc:AddList({text = "Change team", flag = '', tooltip = '', values = {"Deliverant","Advanced Gunsmith","Car Dealer","Safe Seven","Gunsmith","Crafter","Cab Driver","Paramedic","SWAT","Civilian","Criminal","Sheriff","Advanced Car Dealer","Secret Service","Tow Trucker","Trucker"}, callback = function(value)
-        CSEvents.TeamChanger:FireServer(value)
-    end})
-
-    TeamSectionMisc:AddSeparator({text = "Auto buy (Requires roles)"})
-    local SelectedAmmo = nil local SelectedCar = nil local SelectedArmor = nil    
-    local SelectedAuto local SelectedSemi local SelectedShotty
-    local AmmoButton=nil local CarButton=nil local ArmorButton=nil  local AutoButton=nil local SemiButton=nil local ShotButton=nil
-    local Ammount = 1
-    local IsCrate = false
-
-    TeamSectionMisc:AddSlider({text = 'Purchase Quantity', flag = '', tooltip = 'How many items you want to buy', min = 1, max = 100, increment = 1, callback = function(number)
-        Ammount = number
-    end})
-    TeamSectionMisc:AddToggle({text = 'Is Crate', flag = '', tooltip = '', callback = function(bool)
-        IsCrate = bool
-    end})
-
-    TeamSectionMisc:AddList({text = "Selected Ammo", flag = '', tooltip = '', values = ValidItemList.Ammo, callback = function(value)
-        SelectedAmmo = value
-        if AmmoButton then            
-            AmmoButton:SetText("Buy "..tostring(Ammount).." ["..SelectedAmmo.."]")            
-        end
-    end}) AmmoButton = TeamSectionMisc:AddButton({text = 'Buy none', callback = function()
-        if SelectedAmmo ~= nil then
-            PurchaseItems(SelectedAmmo, Ammount, IsCrate)
-        end
-    end})
-
-    TeamSectionMisc:AddList({text = "Selected Auto", flag = '', tooltip = '', values = ValidItemList.autos, callback = function(value)
-        SelectedAuto = value
-        if AutoButton then
-            if IsCrate then
-                AutoButton:SetText("Buy ".."crate: ["..SelectedAuto.."]")
-            else
-                AutoButton:SetText("Buy "..tostring(Ammount).." ["..SelectedAuto.."]")
-            end
-        end
-    end}) AutoButton = TeamSectionMisc:AddButton({text = 'Buy none', callback = function()
-        if SelectedAuto ~= nil then
-            PurchaseItems(SelectedAuto, Ammount, IsCrate)
-        end
-    end})
-
-    TeamSectionMisc:AddList({text = "Selected Semi", flag = '', tooltip = '', values = ValidItemList.semis, callback = function(value)
-        SelectedSemi = value
-        if SemiButton then
-            if IsCrate then
-                SemiButton:SetText("Buy ".."crate: ["..SelectedSemi.."]")
-            else
-                SemiButton:SetText("Buy "..tostring(Ammount).." ["..SelectedSemi.."]")
-            end
-        end
-    end}) SemiButton = TeamSectionMisc:AddButton({text = 'Buy none', callback = function()
-        if SelectedSemi ~= nil then
-            PurchaseItems(SelectedSemi, Ammount, IsCrate)
-        end
-    end})
-
-    TeamSectionMisc:AddList({text = "Selected Shotty", flag = '', tooltip = '', values = ValidItemList.shotguns, callback = function(value)
-        SelectedShotty = value
-        if ShotButton then
-            if IsCrate then
-                ShotButton:SetText("Buy ".."crate: ["..SelectedShotty.."]")
-            else
-                ShotButton:SetText("Buy "..tostring(Ammount).." ["..SelectedShotty.."]")
-            end
-        end
-    end}) ShotButton = TeamSectionMisc:AddButton({text = 'Buy none', callback = function()
-        if SelectedShotty ~= nil then
-            PurchaseItems(SelectedShotty, Ammount, IsCrate)
-        end
-    end})
-
-    TeamSectionMisc:AddList({text = "Selected Armor", flag = '', tooltip = '', values = ValidItemList.armors, callback = function(value)
-        SelectedArmor = value
-        if ArmorButton then
-            if IsCrate then
-                ArmorButton:SetText("Buy ".."crate: ["..SelectedArmor.."]")
-            else
-                ArmorButton:SetText("Buy "..tostring(Ammount).." ["..SelectedArmor.."]")
-            end
-        end
-    end}) ArmorButton = TeamSectionMisc:AddButton({text = 'Buy none', callback = function()
-        if SelectedArmor ~= nil then
-            PurchaseItems(SelectedArmor, Ammount, IsCrate)
-        end
-    end})
-
-    TeamSectionMisc:AddList({text = "Selected Car", flag = '', tooltip = '', values = ValidItemList.cars, callback = function(value)
-        SelectedCar = value
-        if CarButton then
-            if IsCrate then
-                CarButton:SetText("Buy ".."crate: ["..SelectedCar.."]")
-            else
-                CarButton:SetText("Buy "..tostring(Ammount).." ["..SelectedCar.."]")
-            end
-        end
-    end}) CarButton = TeamSectionMisc:AddButton({text = 'Buy none', callback = function()
-        if SelectedCar ~= nil then
-            PurchaseItems(SelectedCar, Ammount, IsCrate)
-        end
-    end})
-
-    -- Teleportation --
-    LocalTeleport:AddList({text = 'Teleport to location', flag = '', values = locationNames, callback = function(option)
-        TeleportToLocation(option, true)
-    end})
-end
-
-print("Loading | %70 | Connections")
-
-UserInput.InputBegan:Connect(function(input, game)
-    if input.KeyCode == Enum.KeyCode.LeftShift and not game then
-       Anomiss.Movement.Running = true
-    end
-end) 
-UserInput.InputEnded:Connect(function(input, game)
-    if input.KeyCode == Enum.KeyCode.LeftShift and not game then
-        Anomiss.Movement.Running = false
-    end
-end) 
-UserInput.InputBegan:Connect(function(input, game)
-    if input.UserInputType == Enum.UserInputType.MouseButton2 and not game then
-        Aiming = true
-    end
 end)
-UserInput.InputEnded:Connect(function(input, game)
-    if input.UserInputType == Enum.UserInputType.MouseButton2 and not game then
-        Aiming = false
-    end
+ASection2:addToggle("Shot Multiplier", nil, function(x)   
+    shotMulti = x        
 end)
-
-UserInput.InputEnded:Connect(function(input, game)
-    if Anomiss.Movement.InfiniteJump and input.KeyCode == Enum.KeyCode.Space and not game then
-        LocalPlayer.Character:FindFirstChild("HumanoidRootPart").Velocity = Vector3.new(0, 40, 0)
-    end
-end) 
-
-game:GetService("RunService").RenderStepped:Connect(function() 
-
-    if Anomiss.Visuals.Enables.Chams.Enabled then
-        UpdateChams()
-    end
-
-    if Fov_Circle and Anomiss.Aimbot.FOV.Enabled then
-        local CenterOfScreen = Vector2.new(CCamera.ViewportSize.X / 2, CCamera.ViewportSize.Y / 2)
-        Fov_Circle.Radius = Anomiss.Aimbot.FOV.Radius
-        Fov_Circle.Visible = true   
-        Fov_Circle.Color = Anomiss.Aimbot.FOV.Color
-        Fov_Circle.NumSides = Anomiss.Aimbot.FOV.NumSides
-        
-        if Anomiss.Aimbot.FOV.Position == "Center" then
-            Fov_Circle.Position = CenterOfScreen
-        elseif Anomiss.Aimbot.FOV.Position == "Mouse" then
-            Fov_Circle.Position = Vector2.new(Mouse.X, Mouse.Y + 36)
-        end   
-    end
-
-    if fovOveride then
-        CCamera.FieldOfView = fovValue
-    end
-
-    if Anomiss.Visuals.Other.Thirdperson and LocalPlayer.Character and LocalPlayer.Character.PrimaryPart ~= nil then              
-        CCamera.CFrame = CCamera.CFrame * CFrame.new(Anomiss.Visuals.Other.ThirdpersonX, Anomiss.Visuals.Other.ThirdpersonY, Anomiss.Visuals.Other.ThirdpersonZ)
-    end
-
-    if Anomiss.Visuals.Enables.Chams.Enabled then       
-        for i, highlight in next, ChamCache do 
-            if highlight then
-                local rcolor = tick() % 5 / 5
-                highlight.FillTransparency = Anomiss.Visuals.Enables.Chams.Transparency
-                highlight.OutlineTransparency = Anomiss.Visuals.Enables.Chams.OutlineTransparency
-                if Anomiss.Visuals.Enables.Chams.Rainbow then
-                    highlight.FillColor = Color3.fromHSV(rcolor, 1, 1)
-                    ChamColorPicker:SetColor(rcolor)                                 
+ASection2:addSlider("Shot Ammount", 1, 0, 200, function(v)
+    shotMultiAmmount = v
+end)
+ASection22:addToggle("No Impacts", nil, function(x)   
+    BDelete = x        
+end)
+ASection22:addToggle("Always headshot", nil, function(x)   
+    alwaysHeadShot = x        
+end)
+ASection22:addToggle("No visual recoil", nil, function(x)   
+    Rmod = x
+    bypass()
+end)
+ASection22:addToggle("Custom hit sound", nil, function(x)   
+    customHitSound = x
+end)
+ASection22:addDropdown("Hit sound", {"Skeet", "Rust", "COD", "Test"}, function(x)
+    customHitSoundType = x
+end)
+ASection22:addToggle("Gun Silencer", nil, function(x)   
+    for i,v in pairs(LPlayer.Character:GetChildren()) do
+        if v:IsA("Tool") and v ~= nil then
+            if v.Handle:FindFirstChild("ReloadSound") then
+                if v.Handle:FindFirstChild("GunEmpty") and x then                   
+                    v.Handle.Shot.Name = "" 
+                    v.Handle.GunEmpty.Name = "Shot"                                       
                 else
-                    highlight.FillColor = Anomiss.Visuals.Enables.Chams.Color
+                    v.Handle.Shot.Name = "GunEmpty" 
+                    v.Handle[""].Name = "Shot"                
                 end
+            else
+                return
+            end
+        end
+    end    
+end)
+ASection22:addToggle("Gun Sound Spam", nil, function(x)   
+    gunSoundSpam = x
+end)
+ASection22:addButton("Remove Flash / Smoke | FE", function()    
+    for i,v in pairs(LPlayer.Character:GetChildren()) do
+        if v:IsA("Tool") and v:FindFirstChild("Main") then
+            v.Main.MuzzleFlash:Destroy()
+            v.Main.Smoke:Destroy()
+        end
+    end
+end)
+
+PlrSection:addSlider("Player Fov", 50, 0, 120, function(valuex)
+    camera.FieldOfView = valuex
+end)
+PlrSection:addDropdown("Infinite Jump Mode", {"Fly", "Infinite", }, function(x)
+    jumpMode = x
+end)
+PlrSection:addToggle("Infinite Jump", nil, function(v)
+    infiniteJump = v
+end)   
+PlrSection:addToggle("Noclip", nil, function(v)
+    if v then
+        Noclipping = game:GetService('RunService').Stepped:Connect(noclip)
+    else
+        Noclipping:Disconnect()
+    end
+end)
+local function disableStam(enabled)
+repeat wait() until LPlayer.Character.HumanoidRootPart.Anchored == false       
+    for i,x in pairs(LPlayer.Character:GetChildren()) do
+        if x:IsA("LocalScript") and x.Name ~= "KeyDrawer" and x.Name ~= "Animate" and x.Name ~= "AnimationHandler" then 
+            if enabled then
+                x.Disabled = true
+            else
+                x.Disabled = false
+            end
+        end 
+    end 
+end
+
+PlrSection:addToggle("Infinite Stamina", nil, function(v)
+    infiniteStamina = v    
+    disableStam(v)
+end)
+game.Players.LocalPlayer.CharacterAdded:Connect(function()
+    if infiniteStamina then    
+        wait(2)
+        disableStam(infiniteStamina)    
+    end
+end)
+PlrSection:addToggle("Air Swim", nil, function(v)
+    for i, v in next, getconnections(game:GetService("Workspace"):GetPropertyChangedSignal("Gravity")) do
+        v:Disable()
+    end
+    if v then
+        workspace.Gravity = 0
+        local function swimDied()
+            workspace.Gravity = 140            
+        end
+        gravReset = LPlayer.Character:FindFirstChildOfClass('Humanoid').Died:Connect(swimDied)
+        LPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Climbing,false)
+        LPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown,false)
+        LPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Flying,false)
+        LPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Freefall,false)
+        LPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.GettingUp,false)
+        LPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping,false)
+        LPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Landed,false)
+        LPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Physics,false)
+        LPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.PlatformStanding,false)
+        LPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll,false)
+        LPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Running,false)
+        LPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.RunningNoPhysics,false)
+        LPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated,false)
+        LPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.StrafingNoPhysics,false)
+        LPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Swimming,false)
+        LPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Swimming)
+    else
+        workspace.Gravity = 140
+        if gravReset then
+            gravReset:Disconnect()
+        end
+        LPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Climbing,true)
+        LPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown,true)
+        LPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Flying,true)
+        LPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Freefall,true)
+        LPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.GettingUp,true)
+        LPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping,true)
+        LPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Landed,true)
+        LPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Physics,true)
+        LPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.PlatformStanding,true)
+        LPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll,true)
+        LPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Running,true)
+        LPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.RunningNoPhysics,true)
+        LPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated,true)
+        LPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.StrafingNoPhysics,true)
+        LPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Swimming,true)
+        LPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.RunningNoPhysics)
+    end
+end)
+PlrSection:addToggle("Anti Car", nil, function(v)    
+    antiCar = v
+end)
+PlrSection:addToggle("Speed Bypass - (Dont walk into sharp terrain)", nil, function(v)    
+    speedBypass = v
+end)
+
+local flying = false
+PlrSection:addKeybind("Flight KeyBind", nil, function()        
+    flying = not flying
+    if flying then
+        startFly()                    
+    else
+    	stopFly()             
+    end
+end)
+PlrSectionC:addToggle("Crafter + Paramedic Auto-heal", nil, function(v)
+    AutoHeal = v
+end)
+PlrSectionC:addSlider("Min Health", 1, 0, 100, function(valuex)
+    minHealth = valuex
+end)
+PlrSectionC:addButton("Equip Armor - Helmet + Heavy Vest", function()
+    game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").PurchaseTeamItem:FireServer("Battle Helmet","Single",nil)
+    wait(.4)
+    game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").PurchaseTeamItem:FireServer("Heavy Vest","Single",nil)
+    wait(.3)
+    for i,v in pairs(LPlayer.Backpack:GetChildren()) do
+        if v:IsA("Tool") and v.Name == "Heavy Vest" then 
+            LPlayer.Character.Humanoid:EquipTool(v)   
+            game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").EquipArmor:FireServer()
+        end 
+        wait(.5)
+        if v:IsA("Tool") and v.Name == "Battle Helmet" then 
+            LPlayer.Character.Humanoid:EquipTool(v)
+            game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").EquipArmor:FireServer() 
+        end                 
+    end
+    notify("Equiped armor")
+end)
+
+plrApp:addToggle("Outfit Editer", nil, function(v)
+    LPlayer.PlayerGui.AvatarEditor.Enabled = v
+    LPlayer.PlayerGui.AvatarEditor.WearButton.Visible = not v
+end)
+plrApp:addTextbox("Custom Cloth", "Default", function(value, focusLost)
+    game:GetService("ReplicatedStorage")["_CS.Events"].EquipAvatarItem:FireServer("CustomCloth",value)
+    if focusLost then
+        game:GetService("ReplicatedStorage")["_CS.Events"].EquipAvatarItem:FireServer("CustomCloth",value)
+    end
+end)
+plrApp:addDropdown("Presets", {"Black", "Glitch", "Black & White", "Hacker"}, function(t)
+    if t == "Black" then
+            game:GetService("ReplicatedStorage")["_CS.Events"].EquipAvatarItem:FireServer("CustomCloth",6523367474)
+            game:GetService("ReplicatedStorage")["_CS.Events"].EquipAvatarItem:FireServer("CustomCloth",745499244)
+        else if t == "Glitch" then
+                game:GetService("ReplicatedStorage")["_CS.Events"].EquipAvatarItem:FireServer("CustomCloth",6296322488)
+                game:GetService("ReplicatedStorage")["_CS.Events"].EquipAvatarItem:FireServer("CustomCloth",6296389518)
+            else if t == "Hacker" then
+                game:GetService("ReplicatedStorage")["_CS.Events"].EquipAvatarItem:FireServer("CustomCloth",5594922955)
+                game:GetService("ReplicatedStorage")["_CS.Events"].EquipAvatarItem:FireServer("CustomCloth",6967030358)
+                else if t == "Black & White"  then
+                    game:GetService("ReplicatedStorage")["_CS.Events"].EquipAvatarItem:FireServer("CustomCloth",4797295258)
+                    game:GetService("ReplicatedStorage")["_CS.Events"].EquipAvatarItem:FireServer("CustomCloth",4977671127)
+                    game:GetService("ReplicatedStorage")["_CS.Events"].EquipAvatarItem:FireServer("Color",Color3.fromRGB(0,0,0),"SkinColor")
+                    game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").EquipAvatarItem:FireServer("Color",Color3.fromRGB(255, 255, 255),"HairColor")
+                end
+            end
+        end
+    end
+end)
+plrApp:addColorPicker("Skin Color", Color3.fromRGB(255, 255, 255), function(s)
+    game:GetService("ReplicatedStorage")["_CS.Events"].EquipAvatarItem:FireServer("Color",s,"SkinColor")
+end)
+plrApp:addColorPicker("Hair Color", Color3.fromRGB(255, 255, 255), function(s)
+    game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").EquipAvatarItem:FireServer("Color",s,"HairColor")
+end)
+plrApp:addToggle("Rainbow Character", nil, function(v)
+    rainbow_char = v
+end)
+plrApp:addToggle("Rainbow Hair", nil, function(v)
+    rainbow_hair = v
+end)
+plrApp:addDropdown("Player Glitch", {"Small", "Larger", }, function(x)
+    local H = LPlayer.Character:FindFirstChildWhichIsA('Humanoid')
+    if x == "Small" then
+        local function DeleteOriginal()
+            for i,v in pairs(LPlayer.Character:GetDescendants()) do
+                if v.Name == 'OriginalSize' then
+                    v:Destroy()
+                end           
+            end
+        end       
+        wait(.8)
+        DeleteOriginal()
+        H:FindFirstChild("BodyDepthScale"):Destroy()    
+        wait(.8)
+        DeleteOriginal()
+        H:FindFirstChild("BodyTypeScale"):Destroy()          
+        wait(.8) 
+        DeleteOriginal()
+        H:FindFirstChild("BodyProportionScale"):Destroy()   
+        wait(.8)
+        DeleteOriginal()
+        H:FindFirstChild("HeadScale"):Destroy() 
+        wait(.8)
+        DeleteOriginal()
+        H:FindFirstChild("BodyWidthScale"):Destroy()  
+    else
+        for i,v in pairs(LPlayer.Character.Humanoid:GetChildren()) do
+            if string.find(v.Name,"Scale") then        
+                v:Destroy()
+                wait(1)          
             end
         end        
-    end    
-
+    end
 end)
-game:GetService("RunService").RenderStepped:Connect(function()     
-    --// Aimbots
-    if Anomiss.Aimbot.Enabled and Fov_Circle ~= nil or Anomiss.Aimbot.Silent_aim.Enabled and Fov_Circle ~= nil or Anomiss.Aimbot.FOV.Enabled and Fov_Circle ~= nil then
-        
+plrApp:addButton("Respawn" ,function() 
+   game:GetService("ReplicatedStorage")["_CS.Events"].PayLoad:FireServer()
+end)
+plrAppFE:addButton("Anti-Arrest / Remove wanted lvl" ,function()   
+    LPlayer.Character.Head.PlayerDisplay.Wanted:Destroy()
+    LPlayer.Character.Wanted:Destroy()
+end)
+plrAppFE:addButton("Remove Team Name" ,function()   
+    LPlayer.Character.Head.PlayerDisplay.TeamName:Destroy()
+end)
+plrAppFE:addButton("Untradeable" ,function()   
+    LPlayer.Character.HumanoidRootPart.LocalPlayerBG:Destroy()
+end)
+plrAppFE:addButton("Among Us [FE]", function()
+    pcall(function()
+        amogus()
+    end)
+end)
+plrAppFE:addButton("Anonymous [FE]", function()
+    pcall(function()
+        anonymous()
+    end)
+end)
+plrAppFE:addButton("Remove Face" ,function()   
+    LPlayer.Character.Head.face:Destroy()
+end)
 
-        local AimbotTarget = ClosestTarget(Anomiss.Aimbot.HitPart)         
-        
-        if AimbotTarget and AimbotTarget.Parent ~= nil then
-            local AimbotPlayer = PlayerFromName(AimbotTarget.Parent.Name) 
- 
-            if Aiming and Anomiss.Aimbot.Enabled and not Anomiss.Aimbot.Silent_aim.Enabled then                               
-                local position, b = CCamera:WorldToScreenPoint(AimbotTarget.Position)                   
-                mousemoverel((position.X - Mouse.X) * Anomiss.Aimbot.AimSpeed, (position.Y - Mouse.Y) * Anomiss.Aimbot.AimSpeed)                   
-            end    
+local teamSniperValue = ""
+teamSection:addDropdown("Team Changer", {"Gunsmith", "Civilian", "Crafter", "Advanced Gunsmith", "Trucker", "Tow Trucker", "Secret Service", "Advanced Car Dealer", "Car Dealer","Deliverant", "Criminal", "Crafter", "Cab Driver", "Paramedic", "Mayor", "Military", "SWAT", "Sheriff"}, function(team)
+    game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").TeamChanger:FireServer(team)
+end)
+teamSection:addDropdown("Team Snipe Value", {"Gunsmith", "Civilian", "Crafter", "Advanced Gunsmith", "Trucker", "Tow Trucker", "Secret Service", "Advanced Car Dealer", "Car Dealer","Deliverant", "Criminal", "Crafter", "Cab Driver", "Paramedic", "Mayor", "Military", "SWAT", "Sheriff"}, function(team)
+    teamSniperValue = team
+end)
+teamSection:addToggle("Team Sniper", false, function(v)    
+    repeat wait(1)
+        game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").TeamChanger:FireServer(teamSniperValue)            
+    until not v
+end)
+print("Loading | 25%")
+-- ESP Page
+local backpackDisplay = false
+DisplaySection:addToggle("Display backpacks", nil, function(v)
+    backpackDisplay = v
+end)
+DisplaySection:addToggle("Join notifications", nil, function(v)
+    playerNotify(v)
+end)
+EspSection:addToggle("ESP Enabled", nil, function(v)
+    esp_Enabled = v
+end)
+local maxDisance = 100;
+EspSection:addSlider("Max distance (Helps stop lag)", 100, 0, 2000, function(v)
+    maxDisance = v
+end)
 
-            --// Target ESP Color
-            if Anomiss.Visuals.Enables.TargetHighlight then            
-                for i,p in next, Players:GetPlayers() do
-                    if p ~= LocalPlayer then                    
-                        if p.Name == AimbotPlayer.Name and not table.find(espLib.whitelist, AimbotPlayer.Name) then
-                            table.insert(espLib.whitelist, tostring(AimbotPlayer.Name))                    
+EspSection1:addToggle("ESP Health", nil, function(state)
+    esp_Health = state
+end)
+EspSection1:addToggle("ESP Names", nil, function(state)
+    esp_Names = state
+end)
+EspSection1:addToggle("ESP Distance", nil, function(state)
+   esp_distance = state
+end)
+EspSection1:addToggle("ESP Boxes", nil, function(state)
+    esp_boxes = state
+ end)
+EspSection1:addToggle("ESP Tracers", nil, function(state)
+    esp_tracers = state
+end)
+EspSection1:addDropdown("Tracer origin", {"Bottom", "Top","Mouse"}, function(t)
+    esp_tracer_orig = t
+end)
+EspSection1:addToggle("ESP status level", nil, function(state)
+    esp_WantedLevel = state
+end)
+EspSection1:addToggle("Tool ESP", nil, function(state)
+    esp_tools = state
+end)
+EspSection1:addColorPicker("ESP Main Color", Color3.fromRGB(255, 255, 255), function(s)
+    esp_Main_Colour = s
+end)
+
+wrldSection:addSlider("ClockTime", 0, 0, 23, function(valuex)
+    wLighting.ClockTime = valuex
+end)
+wrldSection:addSlider("Brightness", 1, 0, 25, function(valuex)
+    wLighting.Brightness = valuex
+end)
+wrldSection:addSlider("Exposure", 1, 0, 5, function(valuex)
+    wLighting.ExposureCompensation = valuex
+end)
+wrldSection:addToggle("Shadows", nil, function(state)
+    wLighting.GlobalShadows = state
+end)
+wrldSection:addToggle("Color Correction", nil, function(state)
+    wLighting.ColorCorrection.Enabled = state
+end)
+wrldSection:addColorPicker("Color Correction", Color3.fromRGB(255, 255, 255), function(s)    
+    wLighting.ColorCorrection.TintColor = s    
+end)
+wrldSection:addColorPicker("Ambient", Color3.fromRGB(150, 140, 140), function(s)    
+    wLighting.Ambient = s    
+end)
+MiscEsp:addButton("Printer ESP", function()
+    for i,v in pairs(game:GetService("Workspace").Entities:GetChildren()) do
+        if v:IsA("Model") and v.Name == "Simple Printer" then
+            local a = Instance.new("BoxHandleAdornment")
+            a.Name = v.Name:lower().."_alwayswinAV"
+            a.Parent = v.hitbox
+            a.Adornee = v
+            a.AlwaysOnTop = true
+            a.ZIndex = 0
+            a.Transparency = 0.3
+            a.Color = BrickColor.new("Lime green")
+        end
+    end
+end)
+
+local targetName = nil;
+local plrNum = 1
+specificSection:addTextbox("Target Name", "Default", function(plr)    
+    targetName = plr
+end)
+specificSection:addButton("Teleport to target", function()
+    for i,v in pairs(game:service'Players':GetPlayers()) do
+        if v.Name:match(targetName) then
+            LPlayer.Character.HumanoidRootPart.CFrame = v.Character.HumanoidRootPart.CFrame * CFrame.new(0,2,0)
+            workspace.Camera.CameraSubject = LPlayer.Character.Humanoid
+        end
+    end
+end)
+specificSection:addButton("View target", function()
+    for i,v in pairs(game:service'Players':GetPlayers()) do
+        if v.Name:match(targetName) then
+            workspace.Camera.CameraSubject = v.Character.Humanoid
+        end
+    end
+end)
+specificSection:addButton("Reset Camera", function()    
+    workspace.Camera.CameraSubject = LPlayer.Character.Humanoid       
+end)
+specificSection:addToggle("Highlight Targtet", nil, function(x)   
+    targetHighlight = x
+end)
+specificSection:addButton("Get Backpack items", function()    
+    for i,v in pairs(Players:GetChildren()) do
+        if v.Name:match(targetName) then
+            for c,x in pairs(v.Backpack:GetChildren()) do
+                notify("Item", x.Name)
+            end
+        end
+    end  
+end)
+specificSection:addButton("TP cars to target", function()
+    oldCFrame = LPlayer.Character.HumanoidRootPart.CFrame
+    for i,v in pairs(game:GetService("Workspace").PlayerVehicles:GetChildren()) do
+        if v:FindFirstChild("VehicleSeat") and v ~= nil and v:FindFirstChild("VehicleSeat").Damage.Value > 1 and not v:FindFirstChild("VehicleSeat"):FindFirstChild("SeatWeld") then
+            local Carseat = v:FindFirstChild("VehicleSeat")        
+            Carseat.Disabled = false                 
+            if Carseat ~= nil and Carseat then
+                if Carseat.Parent:FindFirstChild("VehicleSeat") and not Carseat:FindFirstChild("SeatWeld") then   
+                    Carseat.Disabled = false        
+                    for i = 5, 0, -1 do        
+                        wait(.10)
+                        LPlayer.Character.HumanoidRootPart.CFrame = Carseat.CFrame           
+                    end        
+                    wait(.2)  
+                    for i,p in pairs(Players:GetChildren()) do
+                        if p.Name:match(targetName) and LPlayer.Character.Humanoid.SeatPart ~= nil then                           
+                            Carseat.Parent:MoveTo(p.Character.HumanoidRootPart.CFrame.Position)	 
                         end
-                        coroutine.wrap(function()
-                            game.RunService.RenderStepped:Wait()
-                            table.clear(espLib.whitelist)
-                        end)()
-                    end
+                    end                                		
+                    wait(.4)
+                    LPlayer.Character.HumanoidRootPart.CFrame = oldCFrame                                                        
                 end
-            end
-
-        end
-    end    
-
-    if Anomiss.Visuals.Other.AA_Enabled and LocalPlayer.Character and LocalPlayer.Character.PrimaryPart ~= nil then
-        local hrp = LocalPlayer.Character.HumanoidRootPart
-        if Anomiss.Visuals.Other.AA_Mode == "Spin" then
-            hrp.CFrame = hrp.CFrame * CFrame.Angles(0,Anomiss.Visuals.Other.SpinSpeed,0)
-        elseif Anomiss.Visuals.Other.AA_Mode == "Custom" then
-            
+            end   
         end
     end
 end)
-game:GetService("RunService").Heartbeat:Connect(function()
 
-    if Anomiss.Movement.Overide and LocalPlayer.Character then
-        local humanoid =  LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            if Anomiss.Movement.Running then
-                humanoid.WalkSpeed = Anomiss.Movement.RunSpeed
-            else
-                humanoid.WalkSpeed = Anomiss.Movement.Walkspeed
-            end
-            humanoid.JumpPower = Anomiss.Movement.jumppower
-        end
-    end
-
+PlrTarget:addButton("View Mayor", function()
+    game.Workspace.Camera.CameraSubject = getMayor().Character.Humanoid
 end)
-
-print("Loading | %75")
-
-local function CorrectArguments(Args)
-    local Matching = 0
-    local Required = 2
-    local TypeList = {"Instance", "Ray", "Instance", "boolean", "boolean"}
-
-    if #Args < Required then
-        return false    
-    end
-
-    for i, a in next, Args do
-        if typeof(a) == TypeList[i] then
-            Matching += 1
-        end
-    end   
-
-    return Matching >= Required
-end
-local function Beam(origin, end_part)    
-    if Anomiss.Aimbot.Silent_aim.Beams then
-        
-        local colorSequence = ColorSequence.new({ColorSequenceKeypoint.new(0, Anomiss.Aimbot.Silent_aim.BeamProperties.Color),ColorSequenceKeypoint.new(1, Settings.EndColor),})
-        local Part = Instance.new("Part", BeamPart)
-
-        Part.Size = Vector3.new(1, 1, 1)
-        Part.Transparency = 1
-        Part.CanCollide = false
-        Part.CFrame = CFrame.new(origin)
-        Part.Anchored = true
-
-        local Attachment = Instance.new("Attachment", Part)        
-
-        local Attachment2 = Instance.new("Attachment", end_part)
-        local Beam = Instance.new("Beam", Part)
-
-        Beam.FaceCamera = true
-        Beam.Color = colorSequence
-        Beam.Attachment0 = Attachment
-        Beam.Attachment1 = Attachment2
-        Beam.LightEmission = 6
-        Beam.LightInfluence = 1
-        Beam.Width0 = Settings.StartWidth
-        Beam.Width1 = Settings.EndWidth  
-
-        delay(Settings.Time, function()        
-            for i = 0.5, 1, 0.02 do
-                wait()
-                --Beam.Transparency = NumberSequence.new(i)
-            end
-            Part:Destroy()
-            Attachment2:Destroy()
-        end)
-
-    end
-end   
-coroutine.wrap(function()
-    while true do 
-        if Anomiss.Aimbot.Silent_aim.Enabled and Anomiss.Aimbot.Silent_aim.AutoFire then
-            local hitpart = ClosestTarget(Anomiss.Aimbot.HitPart) 
-            if hitpart ~= nil and hitpart.Parent then
-                FireGun("Mouse1")
-                task.wait(0.15)
+PlrTarget:addButton("View Next Player", function()
+    if plrNum < #game.Players:GetPlayers() then
+        plrNum = plrNum + 1
+        for i,v in pairs(game.Players:GetPlayers()) do
+            if i == plrNum then
+                game.Workspace.Camera.CameraSubject = v.Character.Humanoid
             end            
         end
-        task.wait(0.01)
+    end
+end)
+PlrTarget:addButton("View Previous Player", function()
+    if plrNum ~= 1 then
+        plrNum = plrNum - 1
+    end
+    for i,v in pairs(game.Players:GetPlayers()) do
+        if i == plrNum then
+            game.Workspace.Camera.CameraSubject = v.Character.Humanoid            
+        end
+    end
+end)
+PlrTarget:addButton("Teleport To Spectated", function()
+    if plrNum ~= 1 then
+        for i,v in pairs(game.Players:GetPlayers()) do
+            if i == plrNum then
+                LPlayer.Character.HumanoidRootPart.CFrame = v.Character.HumanoidRootPart.CFrame * CFrame.new(0,2,0)
+                if plrNum ~= 1 then
+                    plrNum = 1
+                end
+                for i,v in pairs(game.Players:GetPlayers()) do
+                    if i == plrNum then
+                        game.Workspace.Camera.CameraSubject = v.Character.Humanoid
+                    end
+                end
+            end
+        end
+    end
+end)
+
+local donateAmount = 10
+DonateSection:addTextbox("Donate Amount Value", "0", function(v)
+    donateAmount = v
+end)
+DonateSection:addSlider("Donate Amount Slider", 10, 0, 100000, function(v)
+    donateAmount = v
+end)
+DonateSection:addButton("Donate to Players", function()
+    for i,v in pairs(game:service'Players':GetPlayers()) do
+        if v.Name:match(targetName) then  
+            local cas = tostring(donateAmount)
+            game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").GiveMoneyToPlr:FireServer(v,cas)            
+        end
+    end
+end)
+PlrTarget:addButton("Arrest Player", function()
+    for i,v in pairs(game:service'Players':GetPlayers()) do
+        if v.Name:match(targetName) and not table.find(DevList, v.Name) then
+            if v.Character.Wanted.Value == 0 then  
+                notify(v.Name .. ": Is not wanted")  
+            else                            
+                oldPos = LPlayer.Character.HumanoidRootPart.CFrame
+                LPlayer.Character.HumanoidRootPart.CFrame = v.Character.HumanoidRootPart.CFrame * CFrame.new(0,0,2)
+                wait(.1)
+                game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").ArrestPlayer:FireServer(v)
+                wait(.1)
+                game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").ArrestPlayer:FireServer(v)
+                wait(.1)
+                LPlayer.Character.HumanoidRootPart.CFrame = oldPos                       
+            end
+        end
+    end
+end)
+local autoArrest = false
+OtherSection0:addToggle("Arrest all", nil, function(state)
+    autoArrest = state
+end)
+
+function getCurrentVehicle()   
+    if LPlayer.Character.Humanoid.SeatPart ~= nil then
+        return LPlayer.Character.Humanoid.SeatPart.Parent        
+    end   
+end
+teleSection1:addKeybind("Click TP Keybind", nil, function()
+    if mouse.Target then 
+        if getCurrentVehicle() ~= nil then
+            getCurrentVehicle():SetPrimaryPartCFrame(CFrame.new(mouse.Hit.x, mouse.Hit.y + 5, mouse.Hit.z) * CFrame.new(0,-2,0))
+        else 
+        LPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(mouse.Hit.x, mouse.Hit.y + 5, mouse.Hit.z)      
+        end
+    end
+end)
+--< teleportation
+teleSection2:addButton("Arway", function()
+if getCurrentVehicle() ~= nil then
+    getCurrentVehicle():SetPrimaryPartCFrame(CFrame.new(1861.14111, -65.5734253, -1310.6853, 0.998740196, 0, -0.0501802117, 0, 1, 0, 0.0501802117, 0, 0.998740196) * CFrame.new(0,5,0))
+else 
+LPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(1861.14111, -65.5734253, -1310.6853, 0.998740196, 0, -0.0501802117, 0, 1, 0, 0.0501802117, 0, 0.998740196)end end)
+teleSection2:addButton("Pahrump", function()
+if getCurrentVehicle() ~= nil then
+    getCurrentVehicle():SetPrimaryPartCFrame(CFrame.new(-73.3169708, 9.45411873, 40.8025475, 0.0519082919, 0, -0.998651743, 0, 1, 0, 0.998651743, 0, 0.0519082919) * CFrame.new(0,5,0))
+else 
+LPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-73.3169708, 9.45411873, 40.8025475, 0.0519082919, 0, -0.998651743, 0, 1, 0, 0.998651743, 0, 0.0519082919)end end)
+teleSection2:addButton("Eastdike", function()
+if getCurrentVehicle() ~= nil then
+    getCurrentVehicle():SetPrimaryPartCFrame(CFrame.new(3044.31445, -4.52655077, -3741.91479, -0.939210117, -1.1611624e-07, -0.343343019, -1.19063124e-07, 1, -1.24975301e-08, 0.343343019, 2.91416864e-08, -0.939210117) * CFrame.new(0,5,0))
+else 
+LPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(3044.31445, -4.52655077, -3741.91479, -0.939210117, -1.1611624e-07, -0.343343019, -1.19063124e-07, 1, -1.24975301e-08, 0.343343019, 2.91416864e-08, -0.939210117)end end)
+teleSection2:addButton("Eaphis Plateau", function()
+if getCurrentVehicle() ~= nil then
+    getCurrentVehicle():SetPrimaryPartCFrame(CFrame.new(1751.93347, 77.9265747, 556.575073, 0.99836874, 0, 0.0570888072, 0, 1, 0, -0.0570888072, 0, 0.99836874) * CFrame.new(0,5,0))
+else 
+LPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(1751.93347, 77.9265747, 556.575073, 0.99836874, 0, 0.0570888072, 0, 1, 0, -0.0570888072, 0, 0.99836874)end end)
+teleSection2:addButton("Okby Steppe", function()
+if getCurrentVehicle() ~= nil then
+    getCurrentVehicle():SetPrimaryPartCFrame(CFrame.new(3894.29224, -2.04217577, -3309.31274, 0.819154441, 5.08817486e-08, 0.573573053, -8.20474284e-08, 1, 2.84667561e-08, -0.573573053, -7.03788601e-08, 0.819154441, -7.03788601e-08, 0.819154441) * CFrame.new(0,5,0))
+else 
+LPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(3894.29224, -2.04217577, -3309.31274, 0.819154441, 5.08817486e-08, 0.573573053, -8.20474284e-08, 1, 2.84667561e-08, -0.573573053, -7.03788601e-08, 0.819154441)end end)
+teleSection2:addButton("Hospital", function()
+if getCurrentVehicle() ~= nil then
+    getCurrentVehicle():SetPrimaryPartCFrame(CFrame.new(1620.60095, -65.4234238, -1399.48181, -0.0176989716, 0, -0.99984318, 0, 1, 0, 0.99984318, 0, -0.0176989716) * CFrame.new(0,5,0))
+else 
+LPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(1620.60095, -65.4234238, -1399.48181, -0.0176989716, 0, -0.99984318, 0, 1, 0, 0.99984318, 0, -0.0176989716)end end)
+teleSection2:addButton("Police Station", function()
+if getCurrentVehicle() ~= nil then
+getCurrentVehicle():SetPrimaryPartCFrame(CFrame.new(1613.32397, -62.9234428, -1272.24634, 0.999857605, -3.98448172e-08, 0.0168763287, 4.06155785e-08, 1, -4.53283135e-08, -0.0168763287, 4.60073011e-08, 0.999857605) * CFrame.new(0,5,0))
+else 
+LPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(1613.32397, -62.9234428, -1272.24634, 0.999857605, -3.98448172e-08, 0.0168763287, 4.06155785e-08, 1, -4.53283135e-08, -0.0168763287, 4.60073011e-08, 0.999857605)end end)
+teleSection2:addButton("Depository", function()
+if getCurrentVehicle() ~= nil then
+    getCurrentVehicle():SetPrimaryPartCFrame(CFrame.new(2051.33301, -67.4034195, -1436.65967, 0.989166439, 0, 0.146798298, 0, 1, 0, -0.146798298, 0, 0.989166439) * CFrame.new(0,5,0))
+else 
+LPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(2051.33301, -67.4034195, -1436.65967, 0.989166439, 0, 0.146798298, 0, 1, 0, -0.146798298, 0, 0.989166439)end end)
+teleSection2:addButton("Airfield", function()
+if getCurrentVehicle() ~= nil then
+    getCurrentVehicle():SetPrimaryPartCFrame(CFrame.new(1884.29016, -21.3613071, -36.481102, -0.659217179, 1.00295431e-07, -0.751953006, 6.3527267e-08, 0.99999994, 7.7687254e-08, 0.751953006, 3.44318352e-09, -0.659217179) * CFrame.new(0,5,0))
+else 
+LPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(1884.29016, -21.3613071, -36.481102, -0.659217179, 1.00295431e-07, -0.751953006, 6.3527267e-08, 0.99999994, 7.7687254e-08, 0.751953006, 3.44318352e-09, -0.659217179)end end)
+teleSection3:addButton("Safe Spot 1", function()
+if getCurrentVehicle() ~= nil then
+    getCurrentVehicle():SetPrimaryPartCFrame(CFrame.new(2122.71143, -83.3322983, -1404.4574, -0.701904893, -3.58332279e-08, 0.712271094, -3.54125085e-08, 1, 1.54112971e-08, -0.712271094, -1.4406039e-08, -0.701904893) * CFrame.new(0,5,0))
+else 
+LPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(2122.71143, -83.3322983, -1404.4574, -0.701904893, -3.58332279e-08, 0.712271094, -3.54125085e-08, 1, 1.54112971e-08, -0.712271094, -1.4406039e-08, -0.701904893)end end)
+teleSection3:addButton("Safe Spot 2", function()
+if getCurrentVehicle() ~= nil then
+    getCurrentVehicle():SetPrimaryPartCFrame(CFrame.new(2945.89185, -137.832367, -631.946899, -0.0719730258, -0.0382576138, 0.996672332, -5.91074745e-08, 0.999264121, 0.0383570902, -0.997406602, 0.00276061334, -0.0719199777) * CFrame.new(0,5,0))
+else 
+LPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(2945.89185, -137.832367, -631.946899, -0.0719730258, -0.0382576138, 0.996672332, -5.91074745e-08, 0.999264121, 0.0383570902, -0.997406602, 0.00276061334, -0.0719199777)end end)
+teleSection3:addButton("Safe Spot 3", function()
+if getCurrentVehicle() ~= nil then
+    getCurrentVehicle():SetPrimaryPartCFrame(CFrame.new(1370.47009, 71.7390747, 1057.67322, -0.805606365, 3.60798893e-08, -0.592451155, 9.24334884e-08, 1, -6.47903775e-08, 0.592451155, -1.06957877e-07, -0.805606365) * CFrame.new(0,5,0))
+else 
+LPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(1370.47009, 71.7390747, 1057.67322, -0.805606365, 3.60798893e-08, -0.592451155, 9.24334884e-08, 1, -6.47903775e-08, 0.592451155, -1.06957877e-07, -0.805606365)end end)
+teleSection4:addButton("Player lobby", function()
+if getCurrentVehicle() ~= nil then
+    getCurrentVehicle():SetPrimaryPartCFrame(CFrame.new(451.888794, -8.47341156, -1337.15466, -0.0644594803, 5.36564535e-08, -0.997920215, 3.67105028e-13, 1, 5.37682183e-08, 0.997920215, 3.46550766e-09, -0.0644594803) * CFrame.new(0,5,0))
+else 
+LPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(451.888794, -8.47341156, -1337.15466, -0.0644594803, 5.36564535e-08, -0.997920215, 3.67105028e-13, 1, 5.37682183e-08, 0.997920215, 3.46550766e-09, -0.0644594803)end end)
+
+-- Buy Page
+local currentTool = nil 
+local color1 = Color3.fromRGB(255,255,255)
+local color2 = Color3.fromRGB(255,255,255)
+paintSection:addColorPicker("Primary Color", Color3.fromRGB(255,255,255), function(c)
+    color1 = c
+end)
+paintSection:addColorPicker("Secondary Color", Color3.fromRGB(255,255,255), function(c)
+    color2 = c
+end)
+paintSection:addButton("Paint current tool", function()
+    for i,v in pairs(LPlayer.Character:GetChildren()) do
+        if v:IsA("Tool") and v ~= nil then  
+            currentTool = v
+        end
+    end
+    game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").PaintTool:FireServer(currentTool,color1,color2)
+end)
+
+local buyAmmoAmount = 1
+local ammoType = ""
+AutoBuySection:addDropdown("Ammo", {"9mm", "5.56", "12 Gauge", ".50", ".45 ACP", "5.7x28"}, function(valuex)
+    ammoType = valuex
+end)
+AutoBuySection:addSlider("Ammo Amount", 1, 0, 200, function(v)
+    buyAmmoAmount = v
+end)
+AutoBuySection:addButton("Buy ammo", function()
+    for i = 1, buyAmmoAmount, 1 do
+        wait(.3)   
+        game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").PurchaseTeamItem:FireServer(ammoType,"Single",nil)
+    end
+end)
+local isCrate = false
+local weaponType = nil  
+AutoBuySection:addButton("Buy Weapon", function()
+    if weaponType ~= nil then
+        if isCrate then
+            game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").PurchaseTeamItem:FireServer(weaponType,"Crate",nil)
+            game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").DeliveryFunction:FireServer("PickUpDelivery",weaponType)
+        else
+            game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").PurchaseTeamItem:FireServer(weaponType,"Single",nil)
+        end
+    end
+end)
+AutoBuySection:addDropdown("Weapon type (Gunsmith roles)", {"Sawed Off", "Micro SMG", "Light Vest", "9mm", "AR", "PDW .45", "Heavy Pistol", "Service Rifle", "Skorpion", "Tactical SMG", "Shotgun", "Bullpup Shotgun", "Handgun", "Revolver", "Snubnose", "Lockpick"}, function(t)
+    weaponType = t
+end)
+AutoBuySection:addToggle("Is Crate", nil, function(v)
+    isCrate = v
+end)
+
+local kitSpammerEnabled = false
+BuySectionMisc2:addToggle("Kit Spammer (Requires right role)", nil, function(state)
+    kitSpammerEnabled = state
+end)
+
+miscSection:addButton("Rejoin", function()
+    game:GetService("TeleportService"):Teleport(game.PlaceId, game:GetService("Players").LocalPlayer)
+end)
+miscSection:addButton("No void", function()
+   game:GetService("Workspace").FallenPartsDestroyHeight = math.huge - math.huge
+end)
+miscSection:addButton("Reset cash to 50k", function()
+    for i,v in pairs(workspace.PlayerVehicles:GetChildren()) do
+        game:GetService("ReplicatedStorage")["_CS.Events"].FillUpCar:FireServer(v, 9e9)
+    end
+    wait(.2)
+    game:GetService("TeleportService"):Teleport(game.PlaceId)
+end)
+CarSection:addToggle("Max Speed", nil, function(state)
+    ccar = getCurrentVehicle()  
+    if state then
+        ccar.VehicleSeat.Gear.Value = -100
+    else 
+        ccar.VehicleSeat.Gear.Value = 2
+    end
+end)
+CarSection:addSlider("Car Strength", 1, 0, 100, function(v)
+    ccar = getCurrentVehicle()      
+    ccar.VehicleSeat.Strength.Value = v 
+end)
+CarSection:addSlider("Acceleration", 1, 0, 10000, function(v)
+    ccar = getCurrentVehicle()      
+    ccar.VehicleSeat.Default.Value = v 
+end)
+CarSection:addButton("Spawn Held Car", function() 
+    CSEvents.SpawnVehicle:FireServer(LPlayer.Character.HumanoidRootPart.CFrame, LPlayer.Character:FindFirstChildWhichIsA("Tool"));     
+end)
+CarSection:addButton("Unlock cars (LOOP)", function() 
+    while wait(1) do
+        for i,v in pairs(game:GetService("Workspace").PlayerVehicles:GetDescendants()) do
+            if v:IsA("VehicleSeat") or v:IsA("Seat") then
+                v.Disabled = false
+                wait(.3)
+            end
+        end
+    end
+end)
+CarSection:addButton("Bring all cars", function() 
+    oldCFrame = LPlayer.Character.HumanoidRootPart.CFrame
+    for i,v in pairs(game:GetService("Workspace").PlayerVehicles:GetChildren()) do
+        if v:FindFirstChild("VehicleSeat") and v ~= nil and v:FindFirstChild("VehicleSeat").Damage.Value > 1 and not v:FindFirstChild("VehicleSeat"):FindFirstChild("SeatWeld") then
+            local Carseat = v:FindFirstChild("VehicleSeat")        
+            Carseat.Disabled = false      
+            wait(1)   
+            if Carseat ~= nil and Carseat then
+                if Carseat.Parent:FindFirstChild("VehicleSeat") and not Carseat:FindFirstChild("SeatWeld") then   
+                    Carseat.Disabled = false        
+                    for i = 20, 0, -1 do        
+                        wait(.15)
+                        LPlayer.Character.HumanoidRootPart.CFrame = Carseat.CFrame           
+                    end        
+                    wait()  
+                    if LPlayer.Character.Humanoid.SeatPart ~= nil then      
+                        LPlayer.Character.Humanoid.SeatPart.Parent:SetPrimaryPartCFrame(oldCFrame * CFrame.new(0,2,0))
+                        wait(1)
+                        LPlayer.Character:FindFirstChild("Humanoid").Sit = false
+                        wait()
+                        LPlayer.Character:FindFirstChildOfClass("Humanoid").Jump = true
+                    else
+                        LPlayer.Character.HumanoidRootPart.CFrame = oldCFrame
+                    end                            
+                end
+            end   
+        end
+    end
+end)
+CarSection:addButton("Crash passengers", function() 
+    local seat = game.Players.LocalPlayer.Character.Humanoid.SeatPart
+    seat.Parent:MoveTo(Vector3.new(seat.Parent.PrimaryPart.Position.X, workspace.FallenPartsDestroyHeight+1, seat.Parent.PrimaryPart.Position.Z))
+end)
+CarSection:addButton("Skydive passengers", function() 
+    local seat = game.Players.LocalPlayer.Character.Humanoid.SeatPart
+    seat.Parent:MoveTo(Vector3.new(seat.Parent.PrimaryPart.Position.X, seat.Parent.PrimaryPart.Position.Y + 30000, seat.Parent.PrimaryPart.Position.Z))
+end)
+
+boomSection:addButton("Stop Song", function() 
+    game:GetService("Players").LocalPlayer.Character.Boombox.ToolModel.PlayMusicEvent:FireServer("Stop","http://www.roblox.com/asset/?id=0")end)
+boomSection:addButton("Among us Drip", function() 
+    game:GetService("Players").LocalPlayer.Character.Boombox.ToolModel.PlayMusicEvent:FireServer("Play","http://www.roblox.com/asset/?id=6065418936")end)
+boomSection:addButton("Rick & Morty", function() 
+    game:GetService("Players").LocalPlayer.Character.Boombox.ToolModel.PlayMusicEvent:FireServer("Play","http://www.roblox.com/asset/?id=7009577773")end)
+boomSection:addButton("Gangsters Paridise", function() 
+    game:GetService("Players").LocalPlayer.Character.Boombox.ToolModel.PlayMusicEvent:FireServer("Play","http://www.roblox.com/asset/?id=2980426576")end)
+boomSection:addButton("Moonlight", function() 
+    game:GetService("Players").LocalPlayer.Character.Boombox.ToolModel.PlayMusicEvent:FireServer("Play","http://www.roblox.com/asset/?id=3309207662j")end)
+boomSection:addButton("Lucid Dreams", function() 
+    game:GetService("Players").LocalPlayer.Character.Boombox.ToolModel.PlayMusicEvent:FireServer("Play","http://www.roblox.com/asset/?id=6785290094")end)
+boomSection:addButton("STAY", function() 
+    game:GetService("Players").LocalPlayer.Character.Boombox.ToolModel.PlayMusicEvent:FireServer("Play","http://www.roblox.com/asset/?id=6815150969")end)
+boomSection:addButton("Screaming", function() 
+    game:GetService("Players").LocalPlayer.Character.Boombox.ToolModel.PlayMusicEvent:FireServer("Play","http://www.roblox.com/asset/?id=271550300")end)
+boomSection:addButton("End of time", function() 
+    game:GetService("Players").LocalPlayer.Character.Boombox.ToolModel.PlayMusicEvent:FireServer("Play","http://www.roblox.com/asset/?id=1647301137")end)
+    
+print("Loading | 30%")
+
+ThemeSection:addToggle("Theme Enabled", true, function(state)
+    ThemeEnabled = state
+    if ThemeEnabled then
+        setTheme()
+    end
+end)
+ThemeSection:addDropdown("Theme Mode", {"Purple", "Red", "Green", "White"}, function(valuex)
+    ThemeMode = valuex
+    setTheme()
+end)
+UISection:addKeybind("GUI Keybind", Enum.KeyCode.LeftAlt, function()    
+    Main:toggle()
+    end, function()    
+end)
+
+local c = 1
+function zigzag(X)
+    return math.acos(math.cos(X * math.pi)) / math.pi
+end
+coroutine.wrap(function()
+    while wait(1) do
+        if autoStore then   
+            pcall(function()                       
+                for i,v in pairs(LPlayer.Backpack:GetChildren()) do
+                    if v:IsA("Tool") and v.Name ~= "Boombox" and v.Name ~= "" then 
+                        LPlayer.Character.Humanoid:EquipTool(v)  
+                        wait(.5)
+                        game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").AddItem:FireServer(v.Name,false)                    
+                    end                              
+                end
+            end)
+        end 
+    end
+end)()
+local Character_Parts ={ "Head","LeftHand","LeftLowerArm","LeftUpperArm","RightHand","RightLowerArm","RightUpperArm","UpperTorso","LowerTorso","RightFoot","RightLowerLeg","RightUpperLeg","LeftFoot","LeftLowerLeg","LeftUpperLeg"}
+coroutine.wrap(function()
+    while wait(1)do
+        pcall(function()            
+            if targetHighlight then
+                for _,v in pairs(Players:GetPlayers()) do
+                    if v.Name ~= LPlayer.Name and v.Name:match(targetName) then
+                        for _,c in pairs(Character_Parts)do
+                            if v.Character:FindFirstChild(c)then
+                                local part=v.Character[c]
+                                local a=Instance.new("BoxHandleAdornment")
+                                if c=="Head"then
+                                    a.Size=Vector3.new(1.05,1.05,1.05)
+                                else
+                                    a.Size=part.Size+Vector3.new(.05,.05,.05)
+                                end
+                                a.Parent=game.CoreGui
+                                a.AlwaysOnTop=true
+                                a.Adornee=part
+                                a.ZIndex=0
+                                a.Transparency = 0.7
+                                a.Color3 = Color3.fromRGB(255,255,0)
+                                coroutine.wrap(function()
+                                    wait(1)
+                                    a:Destroy()
+                                end)()                             
+                            end
+                        end
+                    end
+                end
+            end		
+		end)
+	end
+end)()
+coroutine.wrap(function()
+    while wait(1) do
+        if backpackDisplay then   
+            pcall(function()                       
+                for i,v in pairs(Players:GetChildren()) do
+                    if v.Character and v ~= nil and v.Character:FindFirstChild("UpperTorso") then
+                        refreshDisplay(v)				           
+                    end
+                end
+            end)
+        end 
     end
 end)()
 coroutine.wrap(function()
-    while true do
-        StopConnections()
-        task.wait(30)
+    while wait(3) do
+        if autoArrest then    
+            pcall(function()                      
+                for i,v in ipairs(Players:GetChildren()) do
+                    if v.Character.Wanted.Value ~= 1 and not table.find(DevList, v.Name) then 
+                        wait(.1)                        
+                        LPlayer.Character.HumanoidRootPart.Anchored = true 
+                        LPlayer.Character.HumanoidRootPart.CFrame = v.Character.HumanoidRootPart.CFrame * CFrame.new(0,0,2) 
+                        LPlayer.Character.HumanoidRootPart.Anchored = false 
+                        wait(.1)                                               
+                        game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").ArrestPlayer:FireServer(v)                                                       
+                        LPlayer.Character.HumanoidRootPart.CFrame = v.Character.HumanoidRootPart.CFrame * CFrame.new(0,0,0.5)                      
+                        wait(.1)                          
+                        LPlayer.Character.HumanoidRootPart.Anchored = true              
+                        LPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(1370.47009, 71.7390747, 1057.67322, -0.805606365, 3.60798893e-08, -0.592451155, 9.24334884e-08, 1, -6.47903775e-08, 0.592451155, -1.06957877e-07, -0.805606365)
+                        wait(.5)
+                        LPlayer.Character.HumanoidRootPart.Anchored = false
+                    end
+                end                
+            end)          
+        end
+    end
+end)()
+coroutine.wrap(function()
+    while wait(.1) do
+        if kitSpammerEnabled then 
+            pcall(function()                        
+                game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").PurchaseTeamItem:FireServer("Repair Kit","Single",nil)
+                wait(.1)
+                for i,v in pairs(LPlayer.Backpack:GetChildren()) do
+                    if v:IsA("Tool") and v.Name == "Repair Kit" then 
+                        LPlayer.Character.Humanoid:EquipTool(v)  
+                        wait(.2) 
+                        game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").Dropper:FireServer("Repair Kit","Drop")
+                    end                              
+                end            
+            end)
+        end
+    end
+end)()
+coroutine.wrap(function()
+    while wait(.06) do
+        if gunSoundSpam then 
+            pcall(function()                
+                for i,v in pairs(LPlayer.Backpack:GetChildren()) do
+                    if v:IsA("Tool") and v.Name ~= "" and v ~= nil and v.Handle:FindFirstChild("Mag") then                         
+                        game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").AmmoRemover:FireServer(v.Handle.Mag)
+                    end                              
+                end            
+            end)
+        end
+    end
+end)()
+coroutine.wrap(function()    
+        while wait(1.5) do
+            if Hitboxes then
+                pcall(function()                  
+                    for i,v in pairs(game.Players:GetPlayers()) do
+                    if v ~= LPlayer and v.Character and v.Character:FindFirstChild('Head') then
+                        v.Character.Head.Size = Vector3.new(headHitboxSize,headHitboxSize,headHitboxSize)
+                        v.Character.Head.Transparency = hitboxTransparency
+                        v.Character.Head.CanCollide = false
+                        if v.Character.Humanoid.Health == 0 then
+                            v.Character.Head.Size = LPlayer.Character.Head.Size
+                            v.Character.Head.Transparency = LPlayer.Character.Head.Transparency                        
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)()
+UIS.InputBegan:connect(function(key)
+    if infiniteStamina and key.KeyCode == Enum.KeyCode.LeftShift then
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 23
+    end
+end)
+UIS.InputEnded:connect(function(key)
+    if infiniteStamina and key.KeyCode == Enum.KeyCode.LeftShift then
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 13
+    end
+end)
+UIS.InputBegan:connect(function(UserInput)
+    if infiniteJump and jumpMode == "Infinite" and UserInput.UserInputType == Enum.UserInputType.Keyboard and UserInput.KeyCode == Enum.KeyCode.Space then
+        Action(LPlayer.Character.Humanoid, function(self)
+            if self:GetState() == Enum.HumanoidStateType.Jumping or self:GetState() == Enum.HumanoidStateType.Freefall then
+                Action(self.Parent.HumanoidRootPart, function(self)
+                    self.Velocity = Vector3.new(0, lJumpHeight, 0);
+                end)
+            end
+        end)
+    end      
+end)
+UIS.InputBegan:connect(function(process)
+    if infiniteJump and jumpMode == "Fly" then          
+        if UIS:IsKeyDown(Enum.KeyCode.Space) then 
+        repeat wait() 
+            Action(LPlayer.Character.Humanoid, function(self)
+                if self:GetState() == Enum.HumanoidStateType.Jumping or self:GetState() == Enum.HumanoidStateType.Freefall then
+                    Action(self.Parent.HumanoidRootPart, function(self)
+                        self.Velocity = Vector3.new(0, lJumpHeight, 0);
+                    end)
+                end
+            end)            
+            until UIS:IsKeyDown(Enum.KeyCode.Space) == false
+        end
+    end
+end)
+
+
+local MouseDown = false
+UIS.InputBegan:Connect(function(a)
+    if a.UserInputType == Enum.UserInputType.MouseButton1 then
+        MouseDown = true 
+    end
+end)
+UIS.InputEnded:Connect(function(a)
+    if a.UserInputType == Enum.UserInputType.MouseButton1 then
+        MouseDown = false
+    end
+end)
+spawn(function()
+    while wait(SpeedSDelay) do
+        if MouseDown == true and SpeedShotgun then
+            for i,v in pairs(LPlayer.Character:GetChildren()) do
+                if v:IsA("Tool") and v.Name == "Bullpup Shotgun" or v.Name == "Shotgun" or v.Name == "Riot Shotgun" or v.Name == "Sawed Off" then
+                    v.MainGunScript.FireEvent:Fire(mouse,"Shotgun")                    
+                end
+            end
+        end
+    end
+end)
+UIS.InputBegan:Connect(function(a)
+    if a.UserInputType == Enum.UserInputType.MouseButton1 and shotMulti then
+        for i,v in pairs(LPlayer.Character:GetChildren()) do
+            if v:IsA("Tool") and v.Name == "Bullpup Shotgun" or v.Name == "Shotgun" or v.Name == "Riot Shotgun" or v.Name == "Sawed Off" then            
+                for i = shotMultiAmmount, 0, -1 do            
+                    v.MainGunScript.FireEvent:Fire(mouse)               
+                end
+            end
+        end 
+    end
+end)
+
+print("Loading | 50%")
+
+game:GetService("RunService").RenderStepped:connect(function()       
+   if esp_Enabled then       
+        for _,v in pairs(Players:GetChildren()) do
+            if v.Character and v.Character:FindFirstChild("Humanoid") and v.Character:FindFirstChild("Humanoid").Health > 0 and v ~= LPlayer then
+            local part = v.Character.HumanoidRootPart             
+            local distance = LPlayer:DistanceFromCharacter(v.Character.HumanoidRootPart.Position)
+            local Vec ,onscreen =game.Workspace.CurrentCamera:WorldToViewportPoint(part.Position)
+                if onscreen then
+                    if esp_Names and distance < maxDisance and distance > 7 then
+                        local a=Drawing.new("Text")
+                        if esp_distance then                
+                           a.Text = v.Name .. " [" .. math.ceil(distance) .. "]"
+                        else                            
+                           a.Text = v.Name                                         
+                        end 
+                        a.Size=math.clamp(16-(part.Position-game.Workspace.CurrentCamera.CFrame.Position).Magnitude,16,83)
+                        a.Center=true
+                        a.Outline=true
+                        a.OutlineColor=Color3.new()
+                        a.Font=Drawing.Fonts.UI
+                        a.Visible=true
+                        a.Transparency=1
+                        a.Color=esp_Main_Colour
+                        a.Position=Vector2.new(
+                            game.Workspace.CurrentCamera:WorldToViewportPoint(part.CFrame.Position+part.CFrame.UpVector*(3+(part.Position-game.Workspace.CurrentCamera.CFrame.Position).Magnitude/25)).X,
+                            game.Workspace.CurrentCamera:WorldToViewportPoint(part.CFrame.Position+part.CFrame.UpVector*(3+(part.Position-game.Workspace.CurrentCamera.CFrame.Position).Magnitude/40)).Y)
+                        coroutine.wrap(function()
+                        game.RunService.RenderStepped:Wait()
+                        a:Remove()
+                        end)()
+                    end                    
+                    if esp_Health and distance < maxDisance then
+                        local healthnum=v.Character.Humanoid.Health
+                        local maxhealth=v.Character.Humanoid.MaxHealth
+                        local c=Drawing.new("Quad")
+                        c.Visible=true
+                        c.Color=Color3.new(0,1,0)
+                        c.Thickness=1
+                        c.Transparency=1
+                        c.Filled=false
+                        c.PointA=Vector2.new(
+                            game.Workspace.CurrentCamera:WorldToViewportPoint(part.CFrame.Position+part.CFrame.RightVector*2.5+part.CFrame.UpVector*2.5).X,
+                            game.Workspace.CurrentCamera:WorldToViewportPoint(part.CFrame.Position+part.CFrame.RightVector*2.5+part.CFrame.UpVector*2.5).Y)
+                        c.PointB=Vector2.new(
+                            game.Workspace.CurrentCamera:WorldToViewportPoint(part.CFrame.Position+part.CFrame.RightVector*2+part.CFrame.UpVector*2.5).X,
+                            game.Workspace.CurrentCamera:WorldToViewportPoint(part.CFrame.Position+part.CFrame.RightVector*2+part.CFrame.UpVector*2.5).Y)
+                        c.PointC=Vector2.new(
+                            game.Workspace.CurrentCamera:WorldToViewportPoint(part.CFrame.Position+part.CFrame.RightVector*2+part.CFrame.UpVector*-2.5).X,
+                            game.Workspace.CurrentCamera:WorldToViewportPoint(part.CFrame.Position+part.CFrame.RightVector*2+part.CFrame.UpVector*-2.5).Y)
+                        c.PointD=Vector2.new(
+                            game.Workspace.CurrentCamera:WorldToViewportPoint(part.CFrame.Position+part.CFrame.RightVector*2.5+part.CFrame.UpVector*-2.5).X,
+                            game.Workspace.CurrentCamera:WorldToViewportPoint(part.CFrame.Position+part.CFrame.RightVector*2.5+part.CFrame.UpVector*-2.5).Y)
+                        coroutine.wrap(function()
+                        game.RunService.RenderStepped:Wait()
+                            c:Remove()
+                        end)()
+                        local e=Drawing.new("Quad")
+                        e.Visible=true
+                        e.Color=Color3.new(1,0,0)
+                        e.Thickness=1
+                        e.Transparency=1
+                        e.Filled=true
+                        e.PointA=Vector2.new(
+                        game.Workspace.CurrentCamera:WorldToViewportPoint(part.CFrame.Position+part.CFrame.RightVector*2.5+part.CFrame.UpVector*2.5).X,
+                            game.Workspace.CurrentCamera:WorldToViewportPoint(part.CFrame.Position+part.CFrame.RightVector*2.5+part.CFrame.UpVector*2.5).Y)
+                        e.PointB=Vector2.new(
+                            game.Workspace.CurrentCamera:WorldToViewportPoint(part.CFrame.Position+part.CFrame.RightVector*2+part.CFrame.UpVector*2.5).X,
+                            game.Workspace.CurrentCamera:WorldToViewportPoint(part.CFrame.Position+part.CFrame.RightVector*2+part.CFrame.UpVector*2.5).Y)
+                        e.PointC=Vector2.new(
+                            game.Workspace.CurrentCamera:WorldToViewportPoint(part.CFrame.Position+part.CFrame.RightVector*2+part.CFrame.UpVector*-2.5).X,
+                            game.Workspace.CurrentCamera:WorldToViewportPoint(part.CFrame.Position+part.CFrame.RightVector*2+part.CFrame.UpVector*-2.5).Y)
+                        e.PointD=Vector2.new(
+                            game.Workspace.CurrentCamera:WorldToViewportPoint(part.CFrame.Position+part.CFrame.RightVector*2.5+part.CFrame.UpVector*-2.5).X,
+                            game.Workspace.CurrentCamera:WorldToViewportPoint(part.CFrame.Position+part.CFrame.RightVector*2.5+part.CFrame.UpVector*-2.5).Y)
+                        coroutine.wrap(function()
+                            game.RunService.RenderStepped:Wait()
+                            e:Remove()
+                        end)()
+                        local d=Drawing.new("Quad")
+                        d.Visible=true
+                        d.Color=Color3.new(0,1,0)
+                        d.Thickness=1
+                        d.Transparency=1
+                        d.Filled=true
+                        d.PointA=Vector2.new(
+                            game.Workspace.CurrentCamera:WorldToViewportPoint(part.CFrame.Position+part.CFrame.RightVector*2.5+part.CFrame.UpVector*(-2.5+healthnum/(maxhealth/5))).X,
+                            game.Workspace.CurrentCamera:WorldToViewportPoint(part.CFrame.Position+part.CFrame.RightVector*2.5+part.CFrame.UpVector*(-2.5+healthnum/(maxhealth/5))).Y)
+                        d.PointB=Vector2.new(
+                            game.Workspace.CurrentCamera:WorldToViewportPoint(part.CFrame.Position+part.CFrame.RightVector*2+part.CFrame.UpVector*(-2.5+healthnum/(maxhealth/5))).X,
+                            game.Workspace.CurrentCamera:WorldToViewportPoint(part.CFrame.Position+part.CFrame.RightVector*2+part.CFrame.UpVector*(-2.5+healthnum/(maxhealth/5))).Y)
+                        d.PointC=c.PointC
+                        d.PointD=c.PointD
+                        coroutine.wrap(function()
+                            game.RunService.RenderStepped:Wait()
+                            d:Remove()
+                        end)()
+                    end     
+                    if esp_WantedLevel and distance < maxDisance and distance > 7 then
+                        local a = Drawing.new("Text")
+                        local wantedLevel = v.Character.Wanted.Value
+                        if wantedLevel == 1 then                           
+                            a.Text = "Innocent" 
+                            a.Color = Color3.fromRGB(60, 163, 0)
+                        else
+                            a.Text = "Wanted"
+                            a.Color = Color3.fromRGB(180, 0, 0)
+                        end
+                        a.Size=math.clamp(16-(part.Position-game.Workspace.CurrentCamera.CFrame.Position).Magnitude,16,83)
+                        a.Center=true
+                        a.Outline=true
+                        a.OutlineColor=Color3.new()
+                        a.Font=Drawing.Fonts.UI
+                        a.Visible=true
+                        a.Transparency=1                        
+                        a.Position=Vector2.new(
+                            game.Workspace.CurrentCamera:WorldToViewportPoint(part.CFrame.Position+part.CFrame.UpVector*(3+(part.Position-game.Workspace.CurrentCamera.CFrame.Position).Magnitude/25)).X,
+                            game.Workspace.CurrentCamera:WorldToViewportPoint(part.CFrame.Position+part.CFrame.UpVector*(3+(part.Position-game.Workspace.CurrentCamera.CFrame.Position).Magnitude/75)).Y)
+                        coroutine.wrap(function()
+                        game.RunService.RenderStepped:Wait()
+                        a:Remove()
+                        end)()
+                    end   
+                    if esp_boxes and distance < maxDisance and distance > 7 then
+                        local a=Drawing.new("Quad")
+                        a.Visible=true
+                        a.Color=esp_Main_Colour
+                        a.Thickness=1
+                        a.Transparency=1
+                        a.Filled=false
+                        a.PointA=Vector2.new(
+                            game.Workspace.CurrentCamera:WorldToViewportPoint(part.CFrame.Position+part.CFrame.RightVector*-2+part.CFrame.UpVector*2.5).X,
+                            game.Workspace.CurrentCamera:WorldToViewportPoint(part.CFrame.Position+part.CFrame.RightVector*-2+part.CFrame.UpVector*2.5).Y)-->^
+                        a.PointB=Vector2.new(
+                            game.Workspace.CurrentCamera:WorldToViewportPoint(part.CFrame.Position+part.CFrame.RightVector*2+part.CFrame.UpVector*2.5).X,
+                            game.Workspace.CurrentCamera:WorldToViewportPoint(part.CFrame.Position+part.CFrame.RightVector*2+part.CFrame.UpVector*2.5).Y)--<^
+                        a.PointC=Vector2.new(
+                            game.Workspace.CurrentCamera:WorldToViewportPoint(part.CFrame.Position+part.CFrame.RightVector*2+part.CFrame.UpVector*-2.5).X,
+                            game.Workspace.CurrentCamera:WorldToViewportPoint(part.CFrame.Position+part.CFrame.RightVector*2+part.CFrame.UpVector*-2.5).Y)--<V
+                        a.PointD=Vector2.new(
+                            game.Workspace.CurrentCamera:WorldToViewportPoint(part.CFrame.Position+part.CFrame.RightVector*-2+part.CFrame.UpVector*-2.5).X,
+                            game.Workspace.CurrentCamera:WorldToViewportPoint(part.CFrame.Position+part.CFrame.RightVector*-2+part.CFrame.UpVector*-2.5).Y)-->V
+                        coroutine.wrap(function()
+                            game.RunService.RenderStepped:Wait()
+                            a:Remove()
+                        end)()
+                    end
+                    if esp_tracers and distance < maxDisance and distance > 7 then                        
+                        local t = Drawing.new("Line")
+                        t.Visible = true
+                        t.Color = esp_Main_Colour
+                        t.Thickness = 0.3
+                        t.Transparency = 0.9                        
+                        if esp_tracer_orig == "Bottom" then
+                            t.From = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y - 100)       
+                            else if esp_tracer_orig == "Top" then
+                                t.From = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y - 1000)  
+                                else if esp_tracer_orig == "Mouse" then
+                                    t.From = Vector2.new(mouse.X, mouse.Y + 40)   
+                                end                           
+                            end 
+                        end
+                        t.To = Vector2.new(Vec.X, Vec.Y)          
+                        coroutine.wrap(function()
+                            game.RunService.RenderStepped:Wait()
+                            t:Remove()
+                        end)()                        
+                    end                                      
+                end
+            end                       
+        end
+    end  
+    if LPlayer.Character.Humanoid.Health < minHealth and LPlayer.Character.Humanoid.Health > 0 and AutoHeal then        
+        if not LPlayer.Backpack:FindFirstChild("Medi Kit") then
+            purchaseItem("Medi Kit")         
+        else                     
+            for _, t in ipairs(LPlayer.Backpack:GetChildren()) do
+                if t:IsA("Tool") and t.Name == "Medi Kit" then          
+                    LPlayer.Character.Humanoid:EquipTool(t)            
+                    game:GetService("ReplicatedStorage"):FindFirstChild("_CS.Events").ToolEvent:FireServer("Heal",LPlayer.Character, t)  
+                end
+            end
+        end
+    end   
+    if rainbow_hair or rainbow_char then      
+        local colorx = Color3.fromHSV(zigzag(c),1,1)
+        c = c + .001
+        if rainbow_hair then        
+            game:GetService("ReplicatedStorage")["_CS.Events"].EquipAvatarItem:FireServer("Color",colorx,"HairColor")
+        end
+        if rainbow_char then           
+            game:GetService("ReplicatedStorage")["_CS.Events"].EquipAvatarItem:FireServer("Color",colorx,"SkinColor")            
+        end
+    end  
+    if speedBypass and LPlayer.Character ~= nil and LPlayer.Character.Humanoid and LPlayer.Character.Humanoid.Parent then
+        if LPlayer.Character.Humanoid.MoveDirection.Magnitude > 0 then
+            LPlayer.Character:TranslateBy(LPlayer.Character.Humanoid.MoveDirection)
+        end        
+    end  
+    if antiCar and LPlayer.Character ~= nil and LPlayer.Character then
+        if LPlayer.Character.HumanoidRootPart:FindFirstChild("TouchInterest") then
+            LPlayer.Character.HumanoidRootPart.TouchInterest:Destroy()
+        end
+    end 
+    if BDelete then
+        if folderImpacts:FindFirstChild("Part") then
+            for i,v in pairs(folderImpacts:GetDescendants()) do   
+                if v ~= nil then         
+                    v:Destroy()   
+                end         
+            end
+        end
+    end
+    if esp_tools then        
+        for i,v in pairs(game:GetService("Workspace").Entities:GetChildren()) do
+            if v:IsA("Model") and v.Name == "ToolModel" and LPlayer.Character and v.Handle and not v:FindFirstChild("PlayerWhoDropped") then
+                local Handle = v.Handle
+                local name = Handle.ToolBG.ToolName.Value
+                local dist = (LPlayer.Character.HumanoidRootPart.Position-Handle.Position).Magnitude
+                local vec, onscreen = game.Workspace.CurrentCamera:WorldToViewportPoint(Handle.Position)
+                if onscreen then
+                    local toolTag = Drawing.new("Text")
+                    toolTag.Text = name.." | "..math.round(dist)
+                    toolTag.Outline = true
+                    toolTag.Color = Color3.fromRGB(255, 222, 0)
+                    toolTag.OutlineColor = Color3.fromRGB(0,0,0)
+                    toolTag.Visible = true
+                    toolTag.Font = Drawing.Fonts.UI
+                    toolTag.Transparency = 1
+                    toolTag.Position = Vector2.new(vec.X,vec.Y)
+                    coroutine.wrap(function()
+                        game.RunService.RenderStepped:Wait()
+                        toolTag:Remove()
+                    end)()
+                 end
+            end
+        end
     end    
 end)
 
-print("Loading | %80 | Hooking")
---// Hooking
-local RayCastLength = 4500
-local oldNamecall, oldIndex
-oldNamecall = hookmetamethod(game, "__namecall", newcclosure(function(...)
-    local Method = getnamecallmethod()
-    local CallingScript = getcallingscript()
-    local Arguments = {...}
-    local self = Arguments[1]
+notify("Anomic V", "Scripts made by H4#0321 (new account)")
+notify("Anomic V", "Info can be found in discord")
 
-    local ray_origin = nil       
+wait(.3)
 
-    if Anomiss.Aimbot.Silent_aim.Enabled and tostring(self) == "Workspace" then
-        local HitPart = ClosestTarget(Anomiss.Aimbot.HitPart)      
+bypass()
+setTheme()
 
-        if HitPart ~= nil and LocalPlayer.Character and game.FindFirstChild(LocalPlayer.Character, "Head") then        
-            if (Anomiss.Aimbot.Silent_aim.CallingScript ~= "" and CallingScript.Name == Anomiss.Aimbot.Silent_aim.CallingScript) or (Anomiss.Aimbot.Silent_aim.CallingScript == "") then
+LPlayer.CharacterAdded:Connect(function()
+    if ThemeEnabled then
+        wait(1)    
+        setTheme()
+    end
+    wait(2)
+    bypass()
+end)
 
-                if Anomiss.Aimbot.Silent_aim.PrintCallingScript then
-                    print("Calling script: "..tostring(CallingScript.Name))    
-                end   
+local function HitSound()
+    local sound = Instance.new("Sound",workspace)
+    if customHitSoundType == "Skeet" then
+        sound.SoundId = "rbxassetid://5447626464"
+    elseif customHitSoundType == "Rust" then
+        sound.SoundId = "rbxassetid://5043539486"
+    elseif customHitSoundType == "COD" then
+        sound.SoundId = "rbxassetid://5952120301" 
+    elseif customHitSoundType == "Test" then
+        sound.SoundId = "rbxassetid://4836574859"
+    end
+    sound.Looped = false
+    sound.Volume = 2
+    sound:Play()
+end
 
-                if Anomiss.Aimbot.Silent_aim.Origin == "Camera" then
-                    ray_origin = CCamera.CFrame.Position
-                elseif Anomiss.Aimbot.Silent_aim.Origin == "MyHead" then
-                    ray_origin = game.FindFirstChild(LocalPlayer.Character, "Head").Position                              
-                elseif Anomiss.Aimbot.Silent_aim.Origin == "Teleport" then
-                    ray_origin = HitPart.Position + Vector3.new(0,1,0)               
+local mt = getrawmetatable(game)
+setreadonly(mt, false)
+local namecall = mt.__namecall
+
+mt.__namecall = function(self,...)
+    local args = {...}
+    local method = getnamecallmethod()
+
+    if customHitSound or alwaysHeadShot then
+        if tostring(self) == "WeaponServer" and tostring(method) == "FireServer" then       
+            if tostring(args[1]) == "Player" then  
+                if customHitSoundType then
+                    HitSound()
                 end
-
-                if tostring(Method) == "FindPartOnRay" and CorrectArguments(Arguments) then
-
-                    local CurrentRay = Arguments[2] 
-                    local origin = CurrentRay.Origin              
-
-                    if Anomiss.Aimbot.Silent_aim.Origin == "Called" then
-                        Arguments[2] = Ray.new(origin, (HitPart.Position-origin).Unit * RayCastLength)                
-                        task.spawn(Beam, origin, HitPart) 
-                    else
-                        Arguments[2] = Ray.new(ray_origin, (HitPart.Position-ray_origin).Unit * RayCastLength)            
-                        task.spawn(Beam, ray_origin, HitPart)     
-                    end             
-
-                    return oldNamecall(unpack(Arguments))   
-                end     
-
+                if alwaysHeadShot then
+                    local player = args[2].Parent            
+                    args[4] = player.Head           
+                end 
             end
-        end
-
-    end  
-
-    if tostring(Method) == "FindPartOnRayWithWhitelist" and CallingScript == LocalPlayer.PlayerGui["_L.Handler"].GunHandlerLocal then
-        wait(9e9)
-        return
-    end
-
-    if Anomiss.GunModifiers.FlightShot and tostring(Method) == "FindPartOnRayWithIgnoreList" and CallingScript.Name == "MainGunScript" then
-        return true
-    end
-
-    if Method == "Kick" then		
-		return nil                    
-	end 
-    
-    return oldNamecall(...)
-end))
-
-oldIndex = hookmetamethod(game, "__index", newcclosure(function(Self, index)
-
-    if tostring(Self) == "Humanoid" then
-        if index == "WalkSpeed" then
-            return 13
-        end
-        if index == "JumpPower" then
-            return 30
+            return self.FireServer(self, unpack(args))        
         end
     end
 
-    return oldIndex(Self, index)
-end))
+	return namecall(self,...)
+end
 
-print("Loading | %90")
-StopConnections()
-LocalPlayer.CharacterAdded:Connect(StopConnections)
-espLib:Init()  
-
-print("Loading | %95")
-
-CustomNotify("[Anomiss]", "Welcome "..LocalPlayer.Name..", made by H4#0321", Color3.fromRGB(46, 46, 46), false)
-print("Loading | %100 | Finished")
+Main:SelectPage(Main.pages[1], true)
+print("Loading | 100%")
