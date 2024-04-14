@@ -1,7 +1,5 @@
---// Anomic Script, old and buggy could use a rewrite entirely i admit. - H4#0321
---// Note the FE character features that were merged from "alwayswin" were actually from infinite yield anomic, I didn't know but credits go to them.
-
-local mainName = "Anomiss Lite | 3.0.0" 
+--// Original Anomic Script, old and buggy could use a rewrite entirely i admit. - H4#0321
+local mainName = "Anomiss Lite | 3.0.1" 
 if game:GetService("CoreGui"):FindFirstChild(mainName) then
     game.CoreGui[mainName]:Destroy()
 end
@@ -69,9 +67,9 @@ local ThemeSection = UiPage:addSection("Theme")
 local UISection = UiPage:addSection("UI")
 
 -- // Credits Section
-local creds = UiPage:addSection("Developers: H4#0321")
-local UISection2 = UiPage:addSection("Discord: https://discord.gg/mkv55KWCsp")
-local UISection2 = UiPage:addSection("Credits: EdgeIY, for the fly, Alwayswin for a few FE features when we merged.")
+local creds = UiPage:addSection("Developers: h4developer")
+local UISection2 = UiPage:addSection("Discord: https://discord.gg/HZz9jmJBJf")
+
 
 print("Loading | R")
 if syn then
@@ -86,7 +84,7 @@ if syn then
     Body = game:GetService("HttpService"):JSONEncode({
         cmd = "INVITE_BROWSER",
         args = {
-            code = "mkv55KWCsp"
+            code = "HZz9jmJBJf"
         },
             nonce = game:GetService("HttpService"):GenerateGUID(false)
         }),
@@ -159,8 +157,6 @@ local lJumpHeight = 30
 local ThemeEnabled = true
 local ThemeMode = "Purple" -- Red,Green,White
 local folderImpacts = game:GetService("Workspace").RayIgnore.BulletHoles
-
-local DevList = loadstring(game:HttpGet("https://raw.githubusercontent.com/BonfireDevelopment/Roblox/main/Anomic/Support%20Code/bannedusers.lua"))()
 
 print("Loading | TeamMod")
 for i,v in pairs(teamList) do    
@@ -1106,7 +1102,7 @@ DonateSection:addButton("Donate to Players", function()
 end)
 PlrTarget:addButton("Arrest Player", function()
     for i,v in pairs(game:service'Players':GetPlayers()) do
-        if v.Name:match(targetName) and not table.find(DevList, v.Name) then
+        if v.Name:match(targetName) then
             if v.Character.Wanted.Value == 0 then  
                 notify(v.Name .. ": Is not wanted")  
             else                            
@@ -1452,7 +1448,7 @@ coroutine.wrap(function()
         if autoArrest then    
             pcall(function()                      
                 for i,v in ipairs(Players:GetChildren()) do
-                    if v.Character.Wanted.Value ~= 1 and not table.find(DevList, v.Name) then 
+                    if v.Character.Wanted.Value ~= 1 then 
                         wait(.1)                        
                         LPlayer.Character.HumanoidRootPart.Anchored = true 
                         LPlayer.Character.HumanoidRootPart.CFrame = v.Character.HumanoidRootPart.CFrame * CFrame.new(0,0,2) 
@@ -1597,6 +1593,8 @@ print("Loading | 50%")
 game:GetService("RunService").RenderStepped:connect(function()       
    if esp_Enabled then       
         for _,v in pairs(Players:GetChildren()) do
+            if not v:IsA("Player") then continue end
+
             if v.Character and v.Character:FindFirstChild("Humanoid") and v.Character:FindFirstChild("Humanoid").Health > 0 and v ~= LPlayer then
             local part = v.Character.HumanoidRootPart             
             local distance = LPlayer:DistanceFromCharacter(v.Character.HumanoidRootPart.Position)
