@@ -15,10 +15,12 @@ repeat
  if not isfile("anomiss2") then
     makefolder("anomiss2")
  end
- 
+  
  local menu = game:GetObjects("rbxassetid://17171194056")[1] 
  local tabholder = menu.bg.bg.bg.bg.bg.bg.main.group;
  local tabviewer = menu.bg.bg.bg.bg.bg.bg.tabbuttons;
+ menu.bg.Glow_Around.ImageColor3 = Color3.fromRGB(233, 210, 10) -- Background glow
+ 
  for _, obj in pairs(menu:GetDescendants()) do
     if obj.Name:lower():find('userlabel') then
         obj.Text = 'active user: <font color="rgb(233, 210, 10)">' .. game.Players.LocalPlayer.Name .. '</font>'
