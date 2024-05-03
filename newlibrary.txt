@@ -20,13 +20,13 @@ repeat
  local tabholder = menu.bg.bg.bg.bg.bg.bg.main.group;
  local tabviewer = menu.bg.bg.bg.bg.bg.bg.tabbuttons;
  menu.bg.Glow_Around.ImageColor3 = Color3.fromRGB(233, 210, 10) -- Background glow
- 
+
  for _, obj in pairs(menu:GetDescendants()) do
     if obj.Name:lower():find('userlabel') then
         obj.Text = 'active user: <font color="rgb(233, 210, 10)">' .. game.Players.LocalPlayer.Name .. '</font>'
     end
     if obj.Name:lower():find('buildlabel') then
-        obj.Text = 'build: <font color="rgb(233, 210, 10)">Public</font>'
+        obj.Text = 'build: <font color="rgb(233, 210, 10)">"..library.build.."</font>'
     end
  end
  
@@ -305,6 +305,7 @@ repeat
  local library = {
     Title = 'anomiss.<font color="rgb(233, 210, 10)">pro</font> || Anomic',
     keybind = Enum.KeyCode.RightBracket,
+    build = "Developer",
     Watermark = createWatermark(),
        Colors = {
           libColor = Color3.fromRGB(233, 210, 10),
@@ -396,7 +397,7 @@ repeat
     BuildLabel.Size = UDim2.new(-0.00151476054, 200, 2.14484048, -1)
     BuildLabel.FontFace = Fonts.ProggyTiny
     BuildLabel.RichText = true
-    BuildLabel.Text = "build: <font color=\"rgb(233, 210, 10)\">public</font>"
+    BuildLabel.Text = "build: <font color=\"rgb(233, 210, 10)\">"..library.build.."</font>"
     BuildLabel.TextColor3 = Color3.fromRGB(74, 74, 74)
     BuildLabel.TextSize = 9
     BuildLabel.TextWrapped = true
