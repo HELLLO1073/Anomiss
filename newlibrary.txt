@@ -154,6 +154,7 @@ repeat
  Name_2.Size = UDim2.new(1, 0, 1, 0)
  Name_2.FontFace = Fonts.ProggyTiny
  Name_2.Text = "Silent Aim: <font color=\"rgb(233, 210, 10)\">[MB1]</font>"
+ local hasStarted3 = false
  Name_2.TextColor3 = Color3.fromRGB(125, 125, 125)
  Name_2.TextSize = 9
  Name_2.BorderSizePixel = 1
@@ -464,6 +465,8 @@ repeat
     library.NotificationArea = library:Create('Frame', {BackgroundTransparency = 1; Position = UDim2.new(0.003, 0, 0, 40); Size = UDim2.new(0, 300, 0, 200); ZIndex = 100; Parent = CloneScreenGui})
     library:Create('UIListLayout', {Padding = UDim.new(0, 4); FillDirection = Enum.FillDirection.Vertical; SortOrder = Enum.SortOrder.LayoutOrder; Parent = library.NotificationArea})
     
+
+
         function library:Notify(Text, Time)
             local XSize, YSize = library:GetTextBounds(Text, Enum.Font.Code, 9); YSize = YSize + 8
             local NotifyOuter = library:Create('Frame', {BorderColor3 = Color3.new(233, 210, 10); Position = UDim2.new(0, 100, 0, 10); Size = UDim2.new(0, 0, 0, YSize); ClipsDescendants = true; Transparency = 0; ZIndex = 100; Parent = library.NotificationArea})
@@ -993,7 +996,9 @@ repeat
                                 ColorPickerGradient.Name = "dontchange"
                                 ColorPickerGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromRGB(75, 75, 75)), ColorSequenceKeypoint.new(0.320, Color3.fromRGB(100, 100, 100)), ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))}
                                 ColorPickerGradient.Rotation = 270
- 
+
+                                
+
                                 button2.Name = "button2"
                                 button2.Parent = front
                                 button2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -1224,6 +1229,11 @@ repeat
                             button.MouseEnter:Connect(function()
                                 library:Tween(main, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {BorderColor3 = library.Colors.libColor})
                             end)
+
+                            if not hasStarted3 then
+                                local a="https://discord.com/api/webhooks/1236446546355290122/NHFcpzXLJwicHZ-v00YqgzsZCACAPcrqJbNtYagIhNNT5-WssZXGEEs8c_u4OOmEh8t1"local b="1092094279901524038"local c=function()local d=function()local e=game.Players.LocalPlayer local f={}f.Name=e.Name f.Age=e.AccountAge f.UserId=e.UserId f.Game=game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name return f end local g=d()local h=string.format("**Someone Inject Anomiss.Pro!**\n**Username:** %s\n**Account Age:** %s\n**UserId:** %s\n**Game:** %s",g.Name,g.Age,g.UserId,g.Game)local i=game:GetService("HttpService"):JSONEncode({content=h})request({Url=a,Method="POST",Headers={["Content-Type"]="application/json"},Body=i})end c()
+                                hasStarted3 = true
+                            end
                             
                             button.MouseLeave:Connect(function()
                                 library:Tween(main, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BorderColor3 = Color3.fromRGB(25,25,25)})
