@@ -1,4 +1,4 @@
---- Anomiss Todo 325
+--- Anomiss Todo add colors
 --- Make default theme to yellow 
 --- Rebrand it but give credits to eclipse_wtf
 
