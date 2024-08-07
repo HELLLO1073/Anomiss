@@ -147,6 +147,9 @@ local function updateEsp()
             local distance = (camera.CFrame.p - rootPart.Position).Magnitude
 
             if distance > ESP_SETTINGS.MaxDistance then 
+                for _, drawing in pairs(esp) do
+                    drawing.Visible = false
+                end
                 continue 
             end
             
