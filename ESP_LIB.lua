@@ -47,6 +47,7 @@ local ESP_SETTINGS = {
     TracerThickness = 2,
     SkeletonsColor = Color3.new(1, 1, 1),
     TracerPosition = "Bottom",
+    MaxDistance = 500,
 }
 
 local function create(class, properties)
@@ -141,6 +142,10 @@ local function updateEsp()
             local head = character:FindFirstChild("Head")
             local humanoid = character:FindFirstChild("Humanoid")
             local isBehindWall = ESP_SETTINGS.WallCheck and isPlayerBehindWall(player)
+            local distance = (camera.CFrame.p - rootPart.Position).Magnitude
+
+            if distance < ESP_SETTINGS.MaxDistance then continue end
+            
             local shouldShow = not isBehindWall and ESP_SETTINGS.Enabled
             if rootPart and head and humanoid and shouldShow then
                 local position, onScreen = camera:WorldToViewportPoint(rootPart.Position)
