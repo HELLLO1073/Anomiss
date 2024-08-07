@@ -128,7 +128,9 @@ local function removeEsp(player)
     if not esp then return end
 
     for _, drawing in pairs(esp) do
-        drawing:Remove()
+        if drawing then
+            drawing:Remove()
+        end
     end
 
     cache[player] = nil
@@ -144,7 +146,9 @@ local function updateEsp()
             local isBehindWall = ESP_SETTINGS.WallCheck and isPlayerBehindWall(player)
             local distance = (camera.CFrame.p - rootPart.Position).Magnitude
 
-            if distance < ESP_SETTINGS.MaxDistance then continue end
+            if distance > ESP_SETTINGS.MaxDistance then 
+                continue 
+            end
             
             local shouldShow = not isBehindWall and ESP_SETTINGS.Enabled
             if rootPart and head and humanoid and shouldShow then
