@@ -145,16 +145,9 @@ local function updateEsp()
             local humanoid = character:FindFirstChild("Humanoid")
             local isBehindWall = ESP_SETTINGS.WallCheck and isPlayerBehindWall(player)
             local distance = (camera.CFrame.p - rootPart.Position).Magnitude
-
-            if distance > ESP_SETTINGS.MaxDistance then 
-                for _, drawing in pairs(esp) do
-                    drawing.Visible = false
-                end
-                continue 
-            end
             
             local shouldShow = not isBehindWall and ESP_SETTINGS.Enabled
-            if rootPart and head and humanoid and shouldShow then
+            if rootPart and head and humanoid and shouldShow and distance <= ESP_SETTINGS.MaxDistance then
                 local position, onScreen = camera:WorldToViewportPoint(rootPart.Position)
                 if onScreen then
                     local hrp2D = camera:WorldToViewportPoint(rootPart.Position)
